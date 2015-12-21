@@ -11,3 +11,7 @@ npm install
 bower install
 gulp build
 gulp connect
+
+# Application dependencies
+The server backend needs to be connected to an up&running CASSANDRA database.
+Please run the cassandra server first (port: 9042)!
