@@ -65,7 +65,7 @@ var config = {
         ngApp: 'mvisApp',
 
         js: [
-            './src/main/web_vendor_deps/WebGLEarth/api.js',
+            './src/main/web_deps/WebGLEarth/api.js',
             './bower_components/jquery/dist/jquery.js',
             './bower_components/angular/angular.js',
             './bower_components/angular-cookies/angular-cookies.js',
@@ -81,7 +81,7 @@ var config = {
             './bower_components/underscore/underscore.js',
             './bower_components/highstock/highstock.js',
             './bower_components/highstock/highcharts-more.js',
-            './src/main/web_vendor_deps/timepickerpop/timepickerpop.js'
+            './src/main/web_deps/timepickerpop/timepickerpop.js'
         ],
 
         fonts: [
