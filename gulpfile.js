@@ -142,7 +142,7 @@ gulp.task('clean', function (cb) {
 =            Start the web server            =
 ==========================================*/
 gulp.task('connect', function () {
-    var server = spawn('node', ['./src/main/mvis_server/app.js'], {
+    var server = spawn('node', ['./src/main/server/app.js'], {
         stdio: 'inherit'
     });
     server.unref();
