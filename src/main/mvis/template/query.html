@@ -1,0 +1,97 @@
+<!--
+ MONROE: Visualisation Application.
+ Copyright (C) 2015 Roberto Monno
+
+ Nextworks s.r.l - r DOT monno AT nextworks.it
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <h3 class="panel-title"></h3>
+    </div>
+    <div class="panel-body">
+        <div ng-controller="queryController">
+            <div class="form-group">
+                <label for="datetime">Date-time:</label>
+                <div class="row">
+                    <p class="input-group">
+                        <input type="text" class="form-control" datepicker-popup="{{format}}" ng-model="date" is-open="openedD"
+                            min-date="'01-01-2015'" max-date="'31-12-2020'"/>
+                        <span class="input-group-btn">
+                            <button type="button" class="btn btn-default" ng-click="openDate($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+                        </span>
+                        <timepicker-pop input-time="time" class="input-group" disabled="disabledT" show-meridian='true'></timepicker-pop>
+                    </p>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="timeslot">Timeslot:</label>
+                <ui-select ng-model="timeslot.selected" theme="select2" ng-disabled="disabled" style="width: 100%;">
+                    <ui-select-match placeholder="Limit the data in a specific timeslot...">{{$select.selected.id}}</ui-select-match>
+                    <ui-select-choices repeat="t in timeslots | filter: {id: $select.search}">
+                        <div ng-bind-html="t.id | highlight: $select.search"></div>
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+            <div class="form-group">
+                <label for="testbed">Testbed:</label>
+                <ui-select ng-model="testbed.selected" theme="select2" ng-disabled="disabled" style="width: 100%;" on-select="testbedSelected($model)">
+                    <ui-select-match placeholder="Select a testbed...">{{$select.selected.id}}</ui-select-match>
+                    <ui-select-choices repeat="t in testbeds | filter: {id: $select.search}">
+                        <div ng-bind-html="t.id | highlight: $select.search"></div>
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+            <div class="form-group">
+                <label for="node">Node:</label>
+                <ui-select ng-model="node.selected" theme="select2" ng-disabled="disabled" style="width: 100%;" on-select="nodeSelected($model)">
+                    <ui-select-match placeholder="Select a node...">{{$select.selected.id}}</ui-select-match>
+                    <ui-select-choices repeat="n in nodes | filter: {id: $select.search}">
+                        <div ng-bind-html="n.id | highlight: $select.search"></div>
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+            <div class="form-group">
+                <label for="iface">Interface:</label>
+                <ui-select ng-model="iface.selected" theme="select2" ng-disabled="disabled" style="width: 100%;">
+                    <ui-select-match placeholder="Select an interface...">{{$select.selected.id}}</ui-select-match>
+                    <ui-select-choices repeat="i in ifaces | filter: {id: $select.search}">
+                        <div ng-bind-html="i.id | highlight: $select.search"></div>
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+            <div class="form-group">
+                <label for="experiment">Experiment:</label>
+                <ui-select ng-model="experiment.selected" theme="select2" ng-disabled="disabled" style="width: 100%;">
+                    <ui-select-match placeholder="Select an experiment...">{{$select.selected.id}}</ui-select-match>
+                    <ui-select-choices repeat="e in experiments | filter: {id: $select.search}">
+                        <div ng-bind-html="e.id | highlight: $select.search"></div>
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+            <div class="form-group">
+                <label for="resolution">Resolution:</label>
+                <ui-select ng-model="resolution.selected" theme="select2" ng-disabled="disabled" style="width: 100%;">
+                    <ui-select-match placeholder="Select a resolution...">{{$select.selected.id}}</ui-select-match>
+                    <ui-select-choices repeat="r in resolutions | filter: {id: $select.search}">
+                        <div ng-bind-html="r.id | highlight: $select.search"></div>
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+            <hr>
+            <button class="btn btn-primary" ng-click="submit()">Submit</button>
+        </div>
+    </div>
+</div>

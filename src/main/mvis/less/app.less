@@ -1,0 +1,56 @@
+@import "bootstrap/less/bootstrap.less";
+
+@color-orange: #ff9900;
+@color-blue: #0033ff;
+@color-gray_light: #cccccc;
+@color-black_dark: #333333;
+@color-black_medium: #454545;
+
+@height-header: 60px;
+@height-footer-logos: 60px;
+@height-footer-notes: 60px;
+
+.navbar-brand {
+    background: url(/img/monroe_logos.jpeg) center center no-repeat;
+    background-size: contain;
+    width: 140px;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+#wrapper {
+    min-height:100%;
+    position:relative;
+}
+
+#header {
+    background: @color-gray_light;
+    padding: @height-header;
+}
+
+#content {
+    padding: @height-header;
+    padding-bottom: @height-footer-logos + @height-footer-notes;
+}
+
+#footer-logos {
+    position:absolute;
+    bottom: @height-footer-notes;
+    width: 100%;
+    height: @height-footer-logos;
+    text-align: center;
+    display: inline-block;
+}
+
+#footer-notes {
+    position:absolute;
+    bottom: 0;
+    width: 100%;
+    height: @height-footer-notes;
+    background: @color-gray_light;
+    text-align: center;
+}
