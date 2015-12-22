@@ -343,6 +343,38 @@ app.get('/signalstrength/:nodeid/:ifaceid/:timestamp/:mintimestamp/:resolution',
         });
 });
 
+app.get('/gps/:country/:site/:nodeid/:timestamp/:mintimestamp/:resolution', function (req, res) {
+    console.log("GPS:", req.params.country, req.params.site, req.params.nodeid, req.params.timestamp,
+                req.params.mintimestamp, req.params.resolution);
+    var centre = get_centre(req.params.country, req.params.site),
+        info = {
+            'centre': {lat: centre.latitude, lng: centre.longitude},
+            'current': {},
+            'data': []
+        }, // prepared query to the CASSANDRA-DB
+        query = 'SELECT Longitude, Latitude, Speed FROM Gps WHERE NodeId = ? AND Ts <= ? AND Ts >= ? ORDER BY Ts DESC LIMIT ?';
+
+    cassclient.execute(query, [req.params.nodeid, req.params.timestamp, req.params.mintimestamp, req.params.resolution],
+                       {prepare: true}, function (err, data) {
+            if (err) {
+                console.log("Error:", err.message);
+                res.status(500).send(err.message);
+            } else {
+                console.log("GPS(", req.params.nodeid, ") data", JSON.stringify(data));
+                var i, len;
+                for (i = 0, len = data.rows.length; i < len; i += 1) {
+                    info.data.unshift({lat: parseFloat(data.rows[i].latitude), lng: parseFloat(data.rows[i].longitude)});
+                }
+                i = len - 1;
+                if (i >= 0) {
+                    info.current.lat = data.rows[i].latitude;
+                    info.current.lng = data.rows[i].longitude;
+                }
+                res.json(info);
+            }
+        });
+});
+
 app.listen(port, address, function () {
     console.log('Express-server listening on ' + address + ':' + port);
 });

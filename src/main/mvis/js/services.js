@@ -93,6 +93,10 @@ mvisServices.service('mvisService', ['$http', function ($http) {
         return $http.get('/signalstrength/' + nodeid + '/' + ifaceid + '/' + timestamp + "/" + mintimestamp + "/" + resolution);
     };
 
+    this.getGps = function (country, site, nodeid, timestamp, mintimestamp, resolution) {
+        return $http.get('/gps/' + country + '/' + site + '/' + nodeid + '/' + timestamp + "/" + mintimestamp + "/" + resolution);
+    };
+
     // Chart utilities
     this.createRTTChart = function (initcallback, loadcallback) {
         return new Highcharts.Chart({

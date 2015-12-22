@@ -598,6 +598,62 @@ mvisControllers.controller('statPeriodicController', ['$scope', '$stateParams', 
         $scope.timers.push(timer);
     }
 
+    function createTracker(info) {
+        var gmap = new google.maps.Map(document.getElementById('map'), {
+                zoom: 8,
+                center: {lat: info.centre.lat, lng: info.centre.lng}
+            }),
+            polyline = new google.maps.Polyline({
+                path: info.data,
+                geodesic: true,
+                strokeColor: '#FF0000',
+                strokeOpacity: 1.0,
+                strokeWeight: 2
+            }),
+            marker = new google.maps.Marker({
+                position: new google.maps.LatLng(info.current.lat, info.current.lng),
+                map: gmap
+            });
+        polyline.setMap(gmap);
+        return {gmap: gmap, polyline: polyline, marker: marker};
+    }
+
+    function gpsPeriodicLoadData(country, site, nodeid) {
+        var tracker, timer, i, len,
+            timestamp = new Date().getTime(),
+            mintimestamp = mvisService.getMinTimestamp(timestamp, "1 hour before");
+
+        mvisService.getGps(country, site, nodeid, timestamp, mintimestamp, 100)
+            .success(function (info) {
+                console.log("GPS info", info);
+                tracker = createTracker(info);
+
+                timer = $interval(function () {
+                    mintimestamp = timestamp;
+                    timestamp = new Date().getTime();
+
+                    mvisService.getGps(country, site, nodeid, timestamp, mintimestamp, 100)
+                        .success(function (info) {
+                            console.log("GPS info", info);
+                            if (info.data.length > 0) {
+                                tracker.marker.setPosition(new google.maps.LatLng(info.current.lat, info.current.lng));
+                                var path = tracker.polyline.getPath();
+                                for (i = 0, len = info.data.length; i < len; i += 1) {
+                                    path.push(new google.maps.LatLng(info.data[i].lat, info.data[i].lng));
+                                }
+                            }
+                        })
+                        .error(function (error) {
+                            $state.go('error', {error: error});
+                        });
+                }, $stateParams.timeout);
+                $scope.timers.push(timer);
+            })
+            .error(function (error) {
+                $state.go('error', {error: error});
+            });
+    }
+
     function getPeriodicAllSignalStrength(nodeid, ifaces) {
         console.log("getPeriodicAllSignalStrength nodeid", nodeid, ", ifaces", ifaces);
         signalstrengthchart = mvisService.createSignalStrenghtStockChart(function () {
@@ -628,6 +684,8 @@ mvisControllers.controller('statPeriodicController', ['$scope', '$stateParams', 
         .error(function (error) {
             $state.go('error', {error: error});
         });
+
+    gpsPeriodicLoadData($stateParams.country, $stateParams.site, nodeid);
 
     // stop timers when the controller is destroyed
     $scope.$on("$destroy", function () {
