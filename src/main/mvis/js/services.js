@@ -155,7 +155,9 @@ mvisServices.service('mvisService', ['$http', function ($http) {
                     load: function () {
                         var i, series = [];
                         for (i = 0; i < this.series.length; i += 1) {
-                            series.push(this.series[i]);
+                            if (this.series[i].name !== "Navigator") {
+                                series.push(this.series[i]);
+                            }
                         }
                         for (i = 0; i < series.length; i += 1) {
                             loadcallback(series[i]);
@@ -251,7 +253,9 @@ mvisServices.service('mvisService', ['$http', function ($http) {
                     load: function () {
                         var i, series = [];
                         for (i = 0; i < this.series.length; i += 1) {
-                            series.push(this.series[i]);
+                            if (this.series[i].name !== "Navigator") {
+                                series.push(this.series[i]);
+                            }
                         }
                         for (i = 0; i < series.length; i += 1) {
                             loadcallback(series[i]);

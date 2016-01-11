@@ -56,7 +56,7 @@ function get_centre(country, site) {
     } else if (country === "Spain" && site === "IMDEA") {
         ret = {latitude: 40.33684, longitude: -3.771060000000034};
 
-    } else if (country === "sweden" && site === "karlstad") {
+    } else if (country === "Sweden" && site === "Karlstad") {
         ret = {latitude: 59.406479, longitude: 13.580814099999998};
 
     } else if (country === "italy" && site === "turin") {
@@ -158,8 +158,8 @@ app.get('/states_location', function (req, res) {
             'longitude': -3.771060000000034
         }, {
             'name': "Karlstad @ Sweden (Karlstads universitet)",
-            'country': "sweden",
-            'site': "karlstad",
+            'country': "Sweden",
+            'site': "Karlstad",
             'latitude': 59.406479,
             'longitude': 13.580814099999998
         }, {
@@ -180,8 +180,9 @@ app.get('/region/:country/:site', function (req, res) {
             'centre_longitude': centre.longitude,
             'data': []
         }, // prepared query to the CASSANDRA-DB
-        query = 'SELECT NodeId, DisplayName, HostName, Longitude, Latitude, Address, Model, Status, Interfaces FROM Devices ' +
-            'WHERE Country = ? AND Site = ?';
+        table = 'devices',
+        query = 'SELECT nodeid, displayname, hostname, longitude, latitude, address, model, status, interfaces FROM ' + table +
+            ' WHERE country = ? AND site = ?';
 
     cassclient.execute(query, [req.params.country, req.params.site], {prepare: true}, function (err, data) {
         if (err) {
@@ -197,7 +198,8 @@ app.get('/region/:country/:site', function (req, res) {
 
 app.get('/nodes_name/:country/:site', function (req, res) {
     // prepared query to the CASSANDRA-DB
-    var query = 'SELECT NodeId, DisplayName, HostName FROM Devices WHERE Country = ? AND Site = ?';
+    var table = 'devices',
+        query = 'SELECT nodeid, displayname, hostname FROM ' + table + ' WHERE country = ? AND site = ?';
 
     cassclient.execute(query, [req.params.country, req.params.site], {prepare: true}, function (err, data) {
         if (err) {
@@ -212,7 +214,8 @@ app.get('/nodes_name/:country/:site', function (req, res) {
 
 app.get('/node_interfaces/:country/:site/:nodeid', function (req, res) {
     // prepared query to the CASSANDRA-DB
-    var query = 'SELECT Interfaces FROM Devices WHERE Country = ? AND Site = ? AND NodeId = ?';
+    var table = 'devices',
+        query = 'SELECT interfaces FROM ' + table + ' WHERE country = ? AND site = ? AND nodeid = ?';
 
     cassclient.execute(query, [req.params.country, req.params.site, req.params.nodeid],
                        {prepare: true}, function (err, data) {
@@ -227,12 +230,15 @@ app.get('/node_interfaces/:country/:site/:nodeid', function (req, res) {
 });
 
 app.get('/rtt/:nodeid/:ifaceid/:timestamp/:mintimestamp/:resolution', function (req, res) {
-    console.log("RTT:", req.params.nodeid, req.params.ifaceid, req.params.timestamp,
-                req.params.mintimestamp, req.params.resolution);
-    // prepared query to the CASSANDRA-DB
-    var query = 'SELECT Ts, Rtt FROM RTT WHERE NodeId = ? AND InterfaceName = ? AND Ts <= ? AND Ts >= ? ORDER BY Ts DESC LIMIT ?';
+    console.log("RTT:", req.params.nodeid, req.params.ifaceid, req.params.timestamp, "[", new Date(parseInt(req.params.timestamp, 10)), "]",
+                req.params.mintimestamp, "[", new Date(parseInt(req.params.mintimestamp, 10)), "]", req.params.resolution);
+    // prepared query to the CASSANDRA-DB (the timestamps are stored in secs!)
+    var threshold = Math.floor(req.params.timestamp / 1000),
+        minthreshold = Math.floor(req.params.mintimestamp / 1000),
+        table = 'monroe_exp_ping',
+        query = 'SELECT timestamp, rtt FROM ' + table + ' WHERE nodeid = ? AND interfacename = ? AND timestamp <= ? AND timestamp >= ? ORDER BY timestamp DESC LIMIT ?';
 
-    cassclient.execute(query, [req.params.nodeid, req.params.ifaceid, req.params.timestamp, req.params.mintimestamp, req.params.resolution],
+    cassclient.execute(query, [req.params.nodeid, req.params.ifaceid, threshold, minthreshold, req.params.resolution],
                        {prepare: true}, function (err, data) {
             if (err) {
                 console.log("Error:", err.message);
@@ -241,7 +247,8 @@ app.get('/rtt/:nodeid/:ifaceid/:timestamp/:mintimestamp/:resolution', function (
                 console.log("RTT(", req.params.nodeid, ":", req.params.ifaceid, ") data", JSON.stringify(data));
                 var i, len, info = [];
                 for (i = 0, len = data.rows.length; i < len; i += 1) {
-                    info.unshift([parseInt(data.rows[i].ts, 10), data.rows[i].rtt]);
+                    // It is needed to convert the data in msecs!
+                    info.unshift([Math.floor(data.rows[i].timestamp * 1000), data.rows[i].rtt]);
                 }
                 res.json(info);
             }
@@ -249,12 +256,15 @@ app.get('/rtt/:nodeid/:ifaceid/:timestamp/:mintimestamp/:resolution', function (
 });
 
 app.get('/packetloss/:nodeid/:ifaceid/:timestamp/:mintimestamp/:resolution', function (req, res) {
-    console.log("PACKETLOSS:", req.params.nodeid, req.params.ifaceid, req.params.timestamp,
-                req.params.mintimestamp, req.params.resolution);
-    // prepared query to the CASSANDRA-DB
-    var query = 'SELECT SequenceNumber FROM RTT WHERE NodeId = ? AND InterfaceName = ? AND Ts <= ? AND Ts >= ? ORDER BY Ts DESC LIMIT ?';
+    console.log("PACKETLOSS:", req.params.nodeid, req.params.ifaceid, req.params.timestamp, "[", new Date(parseInt(req.params.timestamp, 10)), "]",
+                req.params.mintimestamp, "[", new Date(parseInt(req.params.mintimestamp, 10)), "]", req.params.resolution);
+    // prepared query to the CASSANDRA-DB (the timestamps are stored in secs!)
+    var threshold = Math.floor(req.params.timestamp / 1000),
+        minthreshold = Math.floor(req.params.mintimestamp / 1000),
+        table = 'monroe_exp_ping',
+        query = 'SELECT sequencenumber FROM ' + table + ' WHERE nodeid = ? AND interfacename = ? AND timestamp <= ? AND timestamp >= ? ORDER BY timestamp DESC LIMIT ?';
 
-    cassclient.execute(query, [req.params.nodeid, req.params.ifaceid, req.params.timestamp, req.params.mintimestamp, req.params.resolution],
+    cassclient.execute(query, [req.params.nodeid, req.params.ifaceid, threshold, minthreshold, req.params.resolution],
                        {prepare: true}, function (err, data) {
             if (err) {
                 console.log("Error:", err.message);
@@ -287,12 +297,15 @@ function convertConnectionType(num) {
 }
 
 app.get('/connectiontype/:nodeid/:ifaceid/:timestamp/:mintimestamp/:resolution', function (req, res) {
-    console.log("CONNECTIONTYPE:", req.params.nodeid, req.params.ifaceid, req.params.timestamp,
-                req.params.mintimestamp, req.params.resolution);
-    // prepared query to the CASSANDRA-DB
-    var query = 'SELECT Mode FROM SignalStrength WHERE NodeId = ? AND InterfaceName = ? AND Ts <= ? AND Ts >= ? ORDER BY Ts DESC LIMIT ?';
+    console.log("CONNECTIONTYPE:", req.params.nodeid, req.params.ifaceid, req.params.timestamp, "[", new Date(parseInt(req.params.timestamp, 10)), "]",
+                req.params.mintimestamp, "[", new Date(parseInt(req.params.mintimestamp, 10)), "]", req.params.resolution);
+    // prepared query to the CASSANDRA-DB (the timestamps are stored in secs!)
+    var threshold = Math.floor(req.params.timestamp / 1000),
+        minthreshold = Math.floor(req.params.mintimestamp / 1000),
+        table = 'monroe_meta_device_modem',
+        query = 'SELECT mode FROM ' + table + ' WHERE nodeid = ? AND interfacename = ? AND timestamp <= ? AND timestamp >= ? ORDER BY timestamp DESC LIMIT ?';
 
-    cassclient.execute(query, [req.params.nodeid, req.params.ifaceid, req.params.timestamp, req.params.mintimestamp, req.params.resolution],
+    cassclient.execute(query, [req.params.nodeid, req.params.ifaceid, threshold, minthreshold, req.params.resolution],
                        {prepare: true}, function (err, data) {
             if (err) {
                 console.log("Error:", err.message);
@@ -322,12 +335,15 @@ app.get('/connectiontype/:nodeid/:ifaceid/:timestamp/:mintimestamp/:resolution',
 });
 
 app.get('/signalstrength/:nodeid/:ifaceid/:timestamp/:mintimestamp/:resolution', function (req, res) {
-    console.log("SIGNALSTRENGTH:", req.params.nodeid, req.params.ifaceid, req.params.timestamp,
-                req.params.mintimestamp, req.params.resolution);
-    // prepared query to the CASSANDRA-DB
-    var query = 'SELECT Ts, SignalStrength FROM SignalStrength WHERE NodeId = ? AND InterfaceName = ? AND Ts <= ? AND Ts >= ? ORDER BY Ts DESC LIMIT ?';
+    console.log("SIGNALSTRENGTH:", req.params.nodeid, req.params.ifaceid, req.params.timestamp, "[", new Date(parseInt(req.params.timestamp, 10)), "]",
+                req.params.mintimestamp, "[", new Date(parseInt(req.params.mintimestamp, 10)), "]", req.params.resolution);
+    // prepared query to the CASSANDRA-DB (the timestamps are stored in secs!)
+    var threshold = Math.floor(req.params.timestamp / 1000),
+        minthreshold = Math.floor(req.params.mintimestamp / 1000),
+        table = 'monroe_meta_device_modem',
+        query = 'SELECT timestamp, signalstrength FROM ' + table + ' WHERE nodeid = ? AND interfacename = ? AND timestamp <= ? AND timestamp >= ? ORDER BY timestamp DESC LIMIT ?';
 
-    cassclient.execute(query, [req.params.nodeid, req.params.ifaceid, req.params.timestamp, req.params.mintimestamp, req.params.resolution],
+    cassclient.execute(query, [req.params.nodeid, req.params.ifaceid, threshold, minthreshold, req.params.resolution],
                        {prepare: true}, function (err, data) {
             if (err) {
                 console.log("Error:", err.message);
@@ -336,7 +352,8 @@ app.get('/signalstrength/:nodeid/:ifaceid/:timestamp/:mintimestamp/:resolution',
                 console.log("SIGNALSTRENGTH(", req.params.nodeid, ":", req.params.ifaceid, ") data", JSON.stringify(data));
                 var i, len, info = [];
                 for (i = 0, len = data.rows.length; i < len; i += 1) {
-                    info.unshift([parseInt(data.rows[i].ts, 10), data.rows[i].signalstrength]);
+                    // It is needed to convert the data in msecs!
+                    info.unshift([Math.floor(data.rows[i].timestamp * 1000), data.rows[i].signalstrength]);
                 }
                 res.json(info);
             }
@@ -344,17 +361,20 @@ app.get('/signalstrength/:nodeid/:ifaceid/:timestamp/:mintimestamp/:resolution',
 });
 
 app.get('/gps/:country/:site/:nodeid/:timestamp/:mintimestamp/:resolution', function (req, res) {
-    console.log("GPS:", req.params.country, req.params.site, req.params.nodeid, req.params.timestamp,
-                req.params.mintimestamp, req.params.resolution);
+    console.log("GPS:", req.params.country, req.params.site, req.params.nodeid, req.params.timestamp, "[", new Date(parseInt(req.params.timestamp, 10)), "]",
+                req.params.mintimestamp, "[", new Date(parseInt(req.params.mintimestamp, 10)), "]", req.params.resolution);
     var centre = get_centre(req.params.country, req.params.site),
         info = {
             'centre': {lat: centre.latitude, lng: centre.longitude},
             'current': {},
             'data': []
-        }, // prepared query to the CASSANDRA-DB
-        query = 'SELECT Longitude, Latitude, Speed FROM Gps WHERE NodeId = ? AND Ts <= ? AND Ts >= ? ORDER BY Ts DESC LIMIT ?';
+        }, // prepared query to the CASSANDRA-DB (the timestamps are stored in secs!)
+        threshold = Math.floor(req.params.timestamp / 1000),
+        minthreshold = Math.floor(req.params.mintimestamp / 1000),
+        table = 'monroe_meta_device_gps',
+        query = 'SELECT longitude, latitude FROM ' + table + ' WHERE nodeid = ? AND timestamp <= ? AND timestamp >= ? ORDER BY timestamp DESC LIMIT ?';
 
-    cassclient.execute(query, [req.params.nodeid, req.params.timestamp, req.params.mintimestamp, req.params.resolution],
+    cassclient.execute(query, [req.params.nodeid, threshold, minthreshold, req.params.resolution],
                        {prepare: true}, function (err, data) {
             if (err) {
                 console.log("Error:", err.message);

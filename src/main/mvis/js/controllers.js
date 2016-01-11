@@ -328,7 +328,7 @@ mvisControllers.controller('statPingController', ['$scope', '$stateParams', '$st
                     tmp.tot += 1;
                     if (tmp.tot !== 1) {
                         num = parseInt(data[i], 10) - tmp.last;
-                        if (num !== -1) {
+                        if (num !== 1) {
                             tmp.loss += 1;
                         }
                     }
