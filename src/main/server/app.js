@@ -20,8 +20,9 @@
 /*jslint node:true, nomen:true, unparam:true */
 'use strict';
 
-var port = 8080;
-var address = "0.0.0.0";
+var port = 8080,
+    address = "0.0.0.0",
+    dataversion = 1;
 
 var express = require('express'),
     logger = require('morgan'),
@@ -236,9 +237,9 @@ app.get('/rtt/:nodeid/:ifaceid/:timestamp/:mintimestamp/:resolution', function (
     var threshold = Math.floor(req.params.timestamp / 1000),
         minthreshold = Math.floor(req.params.mintimestamp / 1000),
         table = 'monroe_exp_ping',
-        query = 'SELECT timestamp, rtt FROM ' + table + ' WHERE nodeid = ? AND interfacename = ? AND timestamp <= ? AND timestamp >= ? ORDER BY timestamp DESC LIMIT ?';
+        query = 'SELECT timestamp, rtt FROM ' + table + ' WHERE dataversion = ? AND nodeid = ? AND interfacename = ? AND timestamp <= ? AND timestamp >= ? ORDER BY timestamp DESC LIMIT ?';
 
-    cassclient.execute(query, [req.params.nodeid, req.params.ifaceid, threshold, minthreshold, req.params.resolution],
+    cassclient.execute(query, [dataversion, req.params.nodeid, req.params.ifaceid, threshold, minthreshold, req.params.resolution],
                        {prepare: true}, function (err, data) {
             if (err) {
                 console.log("Error:", err.message);
@@ -262,9 +263,9 @@ app.get('/packetloss/:nodeid/:ifaceid/:timestamp/:mintimestamp/:resolution', fun
     var threshold = Math.floor(req.params.timestamp / 1000),
         minthreshold = Math.floor(req.params.mintimestamp / 1000),
         table = 'monroe_exp_ping',
-        query = 'SELECT sequencenumber FROM ' + table + ' WHERE nodeid = ? AND interfacename = ? AND timestamp <= ? AND timestamp >= ? ORDER BY timestamp DESC LIMIT ?';
+        query = 'SELECT sequencenumber FROM ' + table + ' WHERE dataversion = ? AND nodeid = ? AND interfacename = ? AND timestamp <= ? AND timestamp >= ? ORDER BY timestamp DESC LIMIT ?';
 
-    cassclient.execute(query, [req.params.nodeid, req.params.ifaceid, threshold, minthreshold, req.params.resolution],
+    cassclient.execute(query, [dataversion, req.params.nodeid, req.params.ifaceid, threshold, minthreshold, req.params.resolution],
                        {prepare: true}, function (err, data) {
             if (err) {
                 console.log("Error:", err.message);
@@ -303,9 +304,9 @@ app.get('/connectiontype/:nodeid/:ifaceid/:timestamp/:mintimestamp/:resolution',
     var threshold = Math.floor(req.params.timestamp / 1000),
         minthreshold = Math.floor(req.params.mintimestamp / 1000),
         table = 'monroe_meta_device_modem',
-        query = 'SELECT mode FROM ' + table + ' WHERE nodeid = ? AND interfacename = ? AND timestamp <= ? AND timestamp >= ? ORDER BY timestamp DESC LIMIT ?';
+        query = 'SELECT mode FROM ' + table + ' WHERE dataversion = ? AND nodeid = ? AND interfacename = ? AND timestamp <= ? AND timestamp >= ? ORDER BY timestamp DESC LIMIT ?';
 
-    cassclient.execute(query, [req.params.nodeid, req.params.ifaceid, threshold, minthreshold, req.params.resolution],
+    cassclient.execute(query, [dataversion, req.params.nodeid, req.params.ifaceid, threshold, minthreshold, req.params.resolution],
                        {prepare: true}, function (err, data) {
             if (err) {
                 console.log("Error:", err.message);
@@ -341,9 +342,9 @@ app.get('/signalstrength/:nodeid/:ifaceid/:timestamp/:mintimestamp/:resolution',
     var threshold = Math.floor(req.params.timestamp / 1000),
         minthreshold = Math.floor(req.params.mintimestamp / 1000),
         table = 'monroe_meta_device_modem',
-        query = 'SELECT timestamp, signalstrength FROM ' + table + ' WHERE nodeid = ? AND interfacename = ? AND timestamp <= ? AND timestamp >= ? ORDER BY timestamp DESC LIMIT ?';
+        query = 'SELECT timestamp, signalstrength FROM ' + table + ' WHERE dataversion = ? AND nodeid = ? AND interfacename = ? AND timestamp <= ? AND timestamp >= ? ORDER BY timestamp DESC LIMIT ?';
 
-    cassclient.execute(query, [req.params.nodeid, req.params.ifaceid, threshold, minthreshold, req.params.resolution],
+    cassclient.execute(query, [dataversion, req.params.nodeid, req.params.ifaceid, threshold, minthreshold, req.params.resolution],
                        {prepare: true}, function (err, data) {
             if (err) {
                 console.log("Error:", err.message);
@@ -372,9 +373,9 @@ app.get('/gps/:country/:site/:nodeid/:timestamp/:mintimestamp/:resolution', func
         threshold = Math.floor(req.params.timestamp / 1000),
         minthreshold = Math.floor(req.params.mintimestamp / 1000),
         table = 'monroe_meta_device_gps',
-        query = 'SELECT longitude, latitude FROM ' + table + ' WHERE nodeid = ? AND timestamp <= ? AND timestamp >= ? ORDER BY timestamp DESC LIMIT ?';
+        query = 'SELECT longitude, latitude FROM ' + table + ' WHERE dataversion = ? AND nodeid = ? AND timestamp <= ? AND timestamp >= ? ORDER BY timestamp DESC LIMIT ?';
 
-    cassclient.execute(query, [req.params.nodeid, threshold, minthreshold, req.params.resolution],
+    cassclient.execute(query, [dataversion, req.params.nodeid, threshold, minthreshold, req.params.resolution],
                        {prepare: true}, function (err, data) {
             if (err) {
                 console.log("Error:", err.message);
