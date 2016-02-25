@@ -384,12 +384,11 @@ app.get('/gps/:country/:site/:nodeid/:timestamp/:mintimestamp/:resolution', func
                 console.log("GPS(", req.params.nodeid, ") data", JSON.stringify(data));
                 var i, len;
                 for (i = 0, len = data.rows.length; i < len; i += 1) {
-                    info.data.unshift({lat: parseFloat(data.rows[i].latitude), lng: parseFloat(data.rows[i].longitude)});
-                }
-                i = len - 1;
-                if (i >= 0) {
-                    info.current.lat = data.rows[i].latitude;
-                    info.current.lng = data.rows[i].longitude;
+                    if ((data.rows[i].latitude !== null) && (data.rows[i].longitude !== null)) {
+                        info.data.unshift({lat: parseFloat(data.rows[i].latitude), lng: parseFloat(data.rows[i].longitude)});
+                        info.current.lat = parseFloat(data.rows[i].latitude);
+                        info.current.lng = parseFloat(data.rows[i].longitude);
+                    }
                 }
                 res.json(info);
             }

@@ -231,7 +231,7 @@ mvisControllers.controller('stateRegionController', ['$scope', '$state', '$filte
                     model: node.model,
                     status: node.status,
                     interfaces: node.interfaces,
-                    ref: "#/statistic/periodic?country=" + $stateParams.country + "&site=" + $stateParams.site + "&nodeid=" + nodeid + "&timeout=10000"
+                    ref: "#/statistic/periodic?country=" + $stateParams.country + "&site=" + $stateParams.site + "&nodeid=" + nodeid + "&timeout=60000"
                 });
 
                 google.maps.event.addListener(marker, 'click', function () {
@@ -240,7 +240,7 @@ mvisControllers.controller('stateRegionController', ['$scope', '$state', '$filte
                         country: $stateParams.country,
                         site: $stateParams.site,
                         nodeid: marker.getTitle(),
-                        timeout: 10000
+                        timeout: 60000
                     });
                 });
             }, $scope.nodes);
@@ -527,12 +527,14 @@ mvisControllers.controller('statPeriodicController', ['$scope', '$stateParams', 
             mvisService.getRTT(nodeid, ifaceid, timestamp, mintimestamp, 100)
                 .success(function (data) {
                     console.log("RTT: ", data);
-                    if (series.data.length > 0) {
-                        for (i = 0, len = data.length; i < len; i += 1) {
-                            series.addPoint(data[i], true, true);
+                    if (data.length > 0) {
+                        if (series.data.length > 0) {
+                            for (i = 0, len = data.length; i < len; i += 1) {
+                                series.addPoint(data[i], true, true);
+                            }
+                        } else {
+                            series.setData(data, true, true);
                         }
-                    } else {
-                        series.setData(data, true, true);
                     }
                 })
                 .error(function (error) {
@@ -583,12 +585,14 @@ mvisControllers.controller('statPeriodicController', ['$scope', '$stateParams', 
             mvisService.getSignalStrength(nodeid, ifaceid, timestamp, mintimestamp, 100)
                 .success(function (data) {
                     console.log("SIGNALSTRENGTH: ", data);
-                    if (series.data.length > 0) {
-                        for (i = 0, len = data.length; i < len; i += 1) {
-                            series.addPoint(data[i], true, true);
+                    if (data.length > 0) {
+                        if (series.data.length > 0) {
+                            for (i = 0, len = data.length; i < len; i += 1) {
+                                series.addPoint(data[i], true, true);
+                            }
+                        } else {
+                            series.setData(data, true, true);
                         }
-                    } else {
-                        series.setData(data, true, true);
                     }
                 })
                 .error(function (error) {
@@ -600,7 +604,7 @@ mvisControllers.controller('statPeriodicController', ['$scope', '$stateParams', 
 
     function createTracker(info) {
         var gmap = new google.maps.Map(document.getElementById('map'), {
-                zoom: 8,
+                zoom: 15,
                 center: {lat: info.centre.lat, lng: info.centre.lng}
             }),
             polyline = new google.maps.Polyline({
@@ -612,6 +616,7 @@ mvisControllers.controller('statPeriodicController', ['$scope', '$stateParams', 
             }),
             marker = new google.maps.Marker({
                 position: new google.maps.LatLng(info.current.lat, info.current.lng),
+                title: "Lat: " + info.current.lat + ", Lng: " + info.current.lng,
                 map: gmap
             });
         polyline.setMap(gmap);
@@ -637,6 +642,7 @@ mvisControllers.controller('statPeriodicController', ['$scope', '$stateParams', 
                             console.log("GPS info", info);
                             if (info.data.length > 0) {
                                 tracker.marker.setPosition(new google.maps.LatLng(info.current.lat, info.current.lng));
+                                tracker.marker.setTitle("Lat: " + info.current.lat + ", Lng: " + info.current.lng);
                                 var path = tracker.polyline.getPath();
                                 for (i = 0, len = info.data.length; i < len; i += 1) {
                                     path.push(new google.maps.LatLng(info.data[i].lat, info.data[i].lng));
