@@ -78,6 +78,19 @@ mvisApp.config(function ($stateProvider, $urlRouterProvider) {
                 }
             }
         })
+        .state('management', {
+            url: '/management',
+            views: {
+                'main': {
+                    templateUrl: 'template/management/main_mgmt.html',
+                    controller: 'mainMgmtController'
+                },
+                'sidemenu': {
+                    templateUrl: 'template/management/side_mgmt.html',
+                    controller: 'sideMgmtController'
+                }
+            }
+        })
         .state('testbed', {
             url: '/testbed',
             abstract: true,

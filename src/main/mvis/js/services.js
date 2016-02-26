@@ -69,6 +69,10 @@ mvisServices.service('mvisService', ['$http', function ($http) {
         return $http.get('/region/' + country + '/' + site);
     };
 
+    this.getAllNodes = function () {
+        return $http.get('/nodes');
+    };
+
     this.getNodesName = function (country, site) {
         return $http.get('/nodes_name/' + country + '/' + site);
     };

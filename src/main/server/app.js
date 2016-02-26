@@ -197,6 +197,22 @@ app.get('/region/:country/:site', function (req, res) {
     });
 });
 
+app.get('/nodes', function (req, res) {
+    // prepared query to the CASSANDRA-DB
+    var table = 'devices',
+        query = 'SELECT country, site, nodeid, address, displayname, hostname, interfaces, latitude, longitude, status, validfrom, validto FROM ' + table;
+
+    cassclient.execute(query, [], {prepare: true}, function (err, data) {
+        if (err) {
+            console.log("Error:", err.message);
+            res.status(500).send(err.message);
+        } else {
+            console.log("data", JSON.stringify(data));
+            res.json(data.rows);
+        }
+    });
+});
+
 app.get('/nodes_name/:country/:site', function (req, res) {
     // prepared query to the CASSANDRA-DB
     var table = 'devices',

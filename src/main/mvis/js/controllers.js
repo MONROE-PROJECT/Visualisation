@@ -53,6 +53,50 @@ mvisControllers.controller('StartController', ['$scope', '$state', 'mvisService'
         });
 }]);
 
+mvisControllers.controller('mainMgmtController', ['$scope', '$state', '$filter', 'ngTableParams', 'mvisService', function ($scope, $state, $filter, NgTableParams, mvisService) {
+    mvisService.getAllNodes()
+        .success(function (data) {
+            $scope.nodes = [];
+            angular.forEach(data, function (node) {
+                console.log("Node info: ", node);
+                this.push({
+                    country: node.country,
+                    site: node.site,
+                    id: mvisService.composeNodeName(node.nodeid, node.displayname, node.hostname),
+                    address: node.address,
+                    interfaces: node.interfaces,
+                    latitude: node.latitude,
+                    longitude: node.longitude,
+                    status: node.status,
+                    validfrom: node.validfrom,
+                    validto: node.validto
+                });
+            }, $scope.nodes);
+
+            $scope.nodesTable = new NgTableParams({
+                count: 20
+            }, {
+                counts: [],
+                total: $scope.nodes.length,
+                getData: function ($defer, params) {
+                    $scope.nodesData = params.sorting() ? $filter('orderBy')($scope.nodes, params.orderBy()) : $scope.nodes;
+                    $scope.nodesData = params.filter() ? $filter('filter')($scope.nodesData, params.filter()) : $scope.nodes;
+                    $scope.nodesData = $scope.nodesData.slice((params.page() - 1) * params.count(), params.page() * params.count());
+                    $defer.resolve($scope.nodesData);
+                }
+            });
+        })
+        .error(function (error) {
+            $state.go('error', {error: error});
+        });
+}]);
+
+mvisControllers.controller('sideMgmtController', ['$scope', '$state', 'mvisService', function ($scope, $state, mvisService) {
+    $scope.submit = function () {
+        console.log("SUBMIT");
+    };
+}]);
+
 mvisControllers.controller('queryController', ['$scope', '$state', 'mvisService', 'mvisQueryService', function ($scope, $state, mvisService, mvisQueryService) {
     $scope.date = mvisQueryService.date;
     $scope.time = mvisQueryService.time;
