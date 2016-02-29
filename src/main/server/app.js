@@ -224,6 +224,7 @@ app.get('/nodelastactivity/:nodeid/:interfaces', function (req, res) {
         res.json([info]);
     }), interfaces = req.params.interfaces.split(','), query;
 
+    // prepared query to the CASSANDRA-DB
     query = 'SELECT timestamp FROM monroe_exp_ping WHERE dataversion = ? AND nodeid = ? AND interfacename IN ? ORDER BY timestamp DESC LIMIT 1';
     cassclient.execute(query, [dataversion, req.params.nodeid, interfaces], {prepare: true}, function (err, data) {
         if (err) {
@@ -238,6 +239,7 @@ app.get('/nodelastactivity/:nodeid/:interfaces', function (req, res) {
         completed();
     });
 
+    // prepared query to the CASSANDRA-DB
     query = 'SELECT timestamp FROM monroe_meta_device_modem WHERE dataversion = ? AND nodeid = ? AND interfacename IN ? ORDER BY timestamp DESC LIMIT 1';
     cassclient.execute(query, [dataversion, req.params.nodeid, interfaces], {prepare: true}, function (err, data) {
         if (err) {
@@ -252,6 +254,7 @@ app.get('/nodelastactivity/:nodeid/:interfaces', function (req, res) {
         completed();
     });
 
+    // prepared query to the CASSANDRA-DB
     query = 'SELECT timestamp FROM monroe_meta_device_gps WHERE dataversion = ? AND nodeid = ? ORDER BY timestamp DESC LIMIT 1';
     cassclient.execute(query, [dataversion, req.params.nodeid], {prepare: true}, function (err, data) {
         if (err) {
@@ -265,6 +268,31 @@ app.get('/nodelastactivity/:nodeid/:interfaces', function (req, res) {
         }
         completed();
     });
+});
+
+app.post('/register_device', function (req, res) {
+    console.log("Body:", req.body);
+    if ((req.body.username !== "monroeadmin") || (req.body.password !== "monroeadmin")) {
+        res.status(500).send("Unauthorized user credentials!");
+    } else {
+        // prepared query to the CASSANDRA-DB
+        var query = "INSERT INTO devices (country,site,nodeid,address,displayname,hostname,interfaces,latitude,longitude,modemcount,postcode,status,validfrom,validto)" +
+                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            interfaces = req.body.interfaces.split(','),
+            from = new Date(),
+            to = new Date(),
+            params = [req.body.country, req.body.site, req.body.nodeid, req.body.address, req.body.nodename, req.body.nodename, interfaces, req.body.latitude,
+                      req.body.longitude, interfaces.length, req.body.postcode, req.body.status, from, to.setMonth(to.getMonth() + 24)];
+
+        cassclient.execute(query, params, {prepare: true}, function (err, data) {
+            if (err) {
+                console.log("Error:", err.message);
+                res.status(500).send(err.message);
+            } else {
+                res.sendStatus(201);
+            }
+        });
+    }
 });
 
 app.get('/nodes_name/:country/:site', function (req, res) {

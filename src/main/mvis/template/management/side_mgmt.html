@@ -22,14 +22,47 @@
     <div class="panel-body">
         <form role="form">
             <div class="form-group">
-                <input type="text" class="form-control" id="loginName" ng-model="loginName" placeholder="username">
+                <input type="text" class="form-control" id="username" ng-model="username" placeholder="username">
             </div>
             <div class="form-group">
-                <input type="password" class="form-control" id="loginPass" ng-model="loginPass" placeholder="password">
+                <input type="password" class="form-control" id="password" ng-model="password" placeholder="password">
             </div>
             <hr>
 
-            <button class="btn btn-default" ng-click="submit()">Submit</button>
+            <div class="form-group">
+                <label for="nodeid">Node Id</label>
+                <input type="text" class="form-control" id="nodeid" ng-model="nodeid" placeholder="Unique node id">
+            </div>
+            <div class="form-group">
+                <label for="nodename">Node Name</label>
+                <input type="text" class="form-control" id="nodename" ng-model="nodename" placeholder="Test-node-1">
+            </div>
+            <div class="form-group">
+                <label for="interfaces">Interfaces</label>
+                <input type="text" class="form-control" id="interfaces" ng-model="interfaces" placeholder="Comma separated ifs, e.g. eth0, eth1">
+            </div>
+            <div class="form-group">
+                <label for="country">Country</label>
+                <input type="text" class="form-control" id="country" ng-model="country" placeholder="Italy, Spain, Sweden, Norway, etc.">
+            </div>
+            <div class="form-group">
+                <label for="site">Site</label>
+                <input type="text" class="form-control" id="site" ng-model="site" placeholder="Pisa, Turin, Madrid, etc.">
+            </div>
+            <div class="form-group">
+                <label for="address">Address</label>
+                <input type="text" class="form-control" id="address" ng-model="address" placeholder="Via livornese 1024">
+            </div>
+            <div class="form-group">
+                <label for="postcode">Postcode</label>
+                <input type="text" class="form-control" id="postcode" ng-model="postcode" placeholder="56122">
+            </div>
+            <div class="form-group">
+                <label for="status">Status</label>
+                <input type="text" class="form-control" id="status" ng-model="status" placeholder="TEST">
+            </div>
+
+            <button class="btn btn-primary" ng-click="submit()">Submit</button>
         </form>
     </div>
 </div>

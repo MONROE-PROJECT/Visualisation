@@ -140,7 +140,36 @@ mvisControllers.controller('mainMgmtController', ['$scope', '$state', '$filter',
 
 mvisControllers.controller('sideMgmtController', ['$scope', '$state', 'mvisService', function ($scope, $state, mvisService) {
     $scope.submit = function () {
-        console.log("SUBMIT");
+        var geocoder = new google.maps.Geocoder(),
+            fulladdr = $scope.address + "," + $scope.postcode + "," + $scope.site + $scope.country,
+            body = {
+                username: $scope.username,
+                password: $scope.password,
+                nodeid: $scope.nodeid,
+                nodename: $scope.nodename,
+                interfaces: $scope.interfaces,
+                country: $scope.country,
+                site: $scope.site,
+                address: $scope.address,
+                postcode: $scope.postcode,
+                status: $scope.status
+            };
+
+        geocoder.geocode({'address': fulladdr}, function (res, status) {
+            if (status === google.maps.GeocoderStatus.OK) {
+                body.latitude = res[0].geometry.location.lat();
+                body.longitude = res[0].geometry.location.lng();
+            }
+            console.log("sideMgmtController info", body);
+            mvisService.registerDevice(body)
+                .success(function () {
+                    alert("Node successfully registered!");
+                    $state.reload();
+                })
+                .error(function (error) {
+                    $state.go('error', {error: error});
+                });
+        });
     };
 }]);
 

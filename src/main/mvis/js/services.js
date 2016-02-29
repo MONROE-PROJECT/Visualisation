@@ -77,6 +77,10 @@ mvisServices.service('mvisService', ['$http', function ($http) {
         return $http.get('/nodelastactivity/' + nodeid + '/' + interfaces);
     };
 
+    this.registerDevice = function (body) {
+        return $http.post('/register_device', body);
+    };
+
     this.getNodesName = function (country, site) {
         return $http.get('/nodes_name/' + country + '/' + site);
     };
