@@ -69,7 +69,8 @@ mvisControllers.controller('mainMgmtController', ['$scope', '$state', '$filter',
                     longitude: node.longitude,
                     status: node.status,
                     validfrom: node.validfrom,
-                    validto: node.validto
+                    validto: node.validto,
+                    nodeid: node.nodeid
                 });
             }, $scope.nodes);
 
@@ -89,6 +90,52 @@ mvisControllers.controller('mainMgmtController', ['$scope', '$state', '$filter',
         .error(function (error) {
             $state.go('error', {error: error});
         });
+
+    $scope.details = [];
+    $scope.nodeActivity = new NgTableParams({
+        count: 5
+    }, {
+        counts: [],
+        total: $scope.details.length,
+        getData: function ($defer, params) {
+            $scope.nodeDetails = $scope.details;
+            $scope.nodeDetails = $scope.nodeDetails.slice((params.page() - 1) * params.count(), params.page() * params.count());
+            $defer.resolve($scope.nodeDetails);
+        }
+    });
+
+    $scope.getNodeDetails = function () {
+        var i, interfaces,
+            nodeid = parseInt($scope.selNodeId, 10);
+        for (i = 0; i < $scope.nodes.length; i += 1) {
+            if ($scope.nodes[i].nodeid === nodeid) {
+                interfaces = $scope.nodes[i].interfaces;
+            }
+        }
+        console.log("NodeId", nodeid, "Interfaces", interfaces);
+        if (interfaces) {
+            mvisService.getNodeLastActivity(nodeid, interfaces)
+                .success(function (data) {
+                    angular.forEach(data, function (detail) {
+                        console.log("Node detail", detail);
+                        this.push({
+                            id: detail.nodeid,
+                            ping: (detail.ping) ? new Date(parseInt(detail.ping, 10) * 1000).toUTCString() : detail.ping,
+                            modem: (detail.modem) ? new Date(parseInt(detail.modem, 10) * 1000).toUTCString() : detail.modem,
+                            gps: (detail.gps) ? new Date(parseInt(detail.gps, 10) * 1000).toUTCString() : detail.gps
+                        });
+                    }, $scope.details);
+
+                    $scope.nodeActivity.total($scope.details.length);
+                    $scope.nodeActivity.reload();
+                })
+                .error(function (error) {
+                    $state.go('error', {error: error});
+                });
+        } else {
+            console.log("Interfaces not available for", nodeid);
+        }
+    };
 }]);
 
 mvisControllers.controller('sideMgmtController', ['$scope', '$state', 'mvisService', function ($scope, $state, mvisService) {

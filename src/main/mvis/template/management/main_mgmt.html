@@ -33,3 +33,23 @@
         </tr>
     </table>
 </div>
+
+<hr>
+
+<div class="form-group">
+    <input type="text" class="form-control" id="selNodeId" ng-model="selNodeId" placeholder="Select a node id (e.g 1, 2, 109...)">
+</div>
+<div class="form-group">
+    <button class="btn btn-primary" ng-click="getNodeDetails()">Get Details</button>
+</div>
+
+<div>
+    <table ng-table="nodeActivity" class="table table-condensed table-bordered table-striped">
+        <tr ng-repeat="d in nodeDetails">
+            <td data-title="'Id'">{{d.id}}</td>
+            <td data-title="'Ping'">{{d.ping}}</td>
+            <td data-title="'Modem'">{{d.modem}}</td>
+            <td data-title="'Gps'">{{d.gps}}</td>
+        </tr>
+    </table>
+</div>

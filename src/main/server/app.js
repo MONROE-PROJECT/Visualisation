@@ -25,6 +25,7 @@ var port = 8080,
     dataversion = 1;
 
 var express = require('express'),
+    _ = require('underscore'),
     logger = require('morgan'),
     cookieParser = require('cookie-parser'),
     bodyParser = require('body-parser'),
@@ -210,6 +211,59 @@ app.get('/nodes', function (req, res) {
             console.log("data", JSON.stringify(data));
             res.json(data.rows);
         }
+    });
+});
+
+app.get('/nodelastactivity/:nodeid/:interfaces', function (req, res) {
+    var info = {
+        'nodeid': req.params.nodeid,
+        'ping': null,
+        'modem': null,
+        'gps': null
+    }, completed = _.after(3, function () {
+        res.json([info]);
+    }), interfaces = req.params.interfaces.split(','), query;
+
+    query = 'SELECT timestamp FROM monroe_exp_ping WHERE dataversion = ? AND nodeid = ? AND interfacename IN ? ORDER BY timestamp DESC LIMIT 1';
+    cassclient.execute(query, [dataversion, req.params.nodeid, interfaces], {prepare: true}, function (err, data) {
+        if (err) {
+            console.log("Error:", err.message);
+        } else {
+            console.log("RTT(", req.params.nodeid, ":", interfaces, ") data", JSON.stringify(data));
+            var i, len;
+            for (i = 0, len = data.rows.length; i < len; i += 1) {
+                info.ping = data.rows[i].timestamp;
+            }
+        }
+        completed();
+    });
+
+    query = 'SELECT timestamp FROM monroe_meta_device_modem WHERE dataversion = ? AND nodeid = ? AND interfacename IN ? ORDER BY timestamp DESC LIMIT 1';
+    cassclient.execute(query, [dataversion, req.params.nodeid, interfaces], {prepare: true}, function (err, data) {
+        if (err) {
+            console.log("Error:", err.message);
+        } else {
+            console.log("MODEM(", req.params.nodeid, ":", interfaces, ") data", JSON.stringify(data));
+            var i, len;
+            for (i = 0, len = data.rows.length; i < len; i += 1) {
+                info.modem = data.rows[i].timestamp;
+            }
+        }
+        completed();
+    });
+
+    query = 'SELECT timestamp FROM monroe_meta_device_gps WHERE dataversion = ? AND nodeid = ? ORDER BY timestamp DESC LIMIT 1';
+    cassclient.execute(query, [dataversion, req.params.nodeid], {prepare: true}, function (err, data) {
+        if (err) {
+            console.log("Error:", err.message);
+        } else {
+            console.log("GPS(", req.params.nodeid, ") data", JSON.stringify(data));
+            var i, len;
+            for (i = 0, len = data.rows.length; i < len; i += 1) {
+                info.gps = data.rows[i].timestamp;
+            }
+        }
+        completed();
     });
 });
 

@@ -73,6 +73,10 @@ mvisServices.service('mvisService', ['$http', function ($http) {
         return $http.get('/nodes');
     };
 
+    this.getNodeLastActivity = function (nodeid, interfaces) {
+        return $http.get('/nodelastactivity/' + nodeid + '/' + interfaces);
+    };
+
     this.getNodesName = function (country, site) {
         return $http.get('/nodes_name/' + country + '/' + site);
     };
