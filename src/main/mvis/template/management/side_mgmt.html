@@ -42,20 +42,17 @@
                 <input type="text" class="form-control" id="interfaces" ng-model="interfaces" placeholder="Comma separated ifs, e.g. eth0, eth1">
             </div>
             <div class="form-group">
-                <label for="country">Country</label>
-                <input type="text" class="form-control" id="country" ng-model="country" placeholder="Italy, Spain, Sweden, Norway, etc.">
-            </div>
-            <div class="form-group">
-                <label for="site">Site</label>
-                <input type="text" class="form-control" id="site" ng-model="site" placeholder="Pisa, Turin, Madrid, etc.">
+                <label for="testbed">Testbed</label>
+                <ui-select ng-model="testbed.selected" theme="select2" ng-disabled="disabled" style="width: 100%;" on-select="testbedSelected($model)">
+                <ui-select-match placeholder="Select a testbed">{{$select.selected.id}}</ui-select-match>
+                    <ui-select-choices repeat="t in testbeds | filter: {id: $select.search}">
+                        <div ng-bind-html="t.id | highlight: $select.search"></div>
+                    </ui-select-choices>
+                </ui-select>
             </div>
             <div class="form-group">
                 <label for="address">Address</label>
-                <input type="text" class="form-control" id="address" ng-model="address" placeholder="Via livornese 1024">
-            </div>
-            <div class="form-group">
-                <label for="postcode">Postcode</label>
-                <input type="text" class="form-control" id="postcode" ng-model="postcode" placeholder="56122">
+                <input type="text" class="form-control" id="address" ng-model="address" readonly>
             </div>
             <div class="form-group">
                 <label for="status">Status</label>

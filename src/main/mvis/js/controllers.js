@@ -139,23 +139,57 @@ mvisControllers.controller('mainMgmtController', ['$scope', '$state', '$filter',
 }]);
 
 mvisControllers.controller('sideMgmtController', ['$scope', '$state', 'mvisService', function ($scope, $state, mvisService) {
+    $scope.testbed = {};
+    $scope.testbeds = [
+        {id: "Italy - Pisa - NXW"},
+        {id: "Italy - Turin - POLITO"},
+        {id: "Italy - Turin - GTT"},
+        {id: "Spain - IMDEA - IMDEA"},
+        {id: "Norway - Celerway - CWY"},
+        {id: "Sweden - Karlstad - KAU"}
+    ];
+
+    $scope.testbedSelected = function ($model) {
+        console.log("Selected testbed", $model.id);
+        if ($model.id === "Italy - Pisa - NXW") {
+            $scope.address = "Via Livornese 1027, 56122 San Piero A Grado, Pisa, Italia";
+            $scope.postcode = "56122";
+        } else if ($model.id === "Italy - Turin - POLITO") {
+            $scope.address = "Dipartimento di Elettronica e Telecomunicazioni - Corso Duca degli Abruzzi 24, 10129 Torino, Italia";
+            $scope.postcode = "10129";
+        } else if ($model.id === "Italy - Turin - GTT") {
+            $scope.address = "Corso Bramante 66, 10126 Torino, Italia";
+            $scope.postcode = "10126";
+        } else if ($model.id === "Spain - IMDEA - IMDEA") {
+            $scope.address = "Avenida del Mar Mediterráneo 22, 28918 Leganes MADRID, Spain";
+            $scope.postcode = "28918";
+        } else if ($model.id === "Norway - Celerway - CWY") {
+            $scope.address = "Martin Linges VEI 17, 1367 Snaroya, Norway";
+            $scope.postcode = "1367";
+        } else if ($model.id === "Sweden - Karlstad - KAU") {
+            $scope.address = "Universitetsgatan 2, 65188 Karlstad, Sweden";
+            $scope.postcode = "65188";
+        }
+    };
+
+
     $scope.submit = function () {
         var geocoder = new google.maps.Geocoder(),
-            fulladdr = $scope.address + "," + $scope.postcode + "," + $scope.site + $scope.country,
+            t = $scope.testbed.selected.id.replace(" - ", "-").split("-"),
             body = {
                 username: $scope.username,
                 password: $scope.password,
                 nodeid: $scope.nodeid,
                 nodename: $scope.nodename,
                 interfaces: $scope.interfaces,
-                country: $scope.country,
-                site: $scope.site,
+                country: t[0],
+                site: t[1],
                 address: $scope.address,
                 postcode: $scope.postcode,
                 status: $scope.status
             };
 
-        geocoder.geocode({'address': fulladdr}, function (res, status) {
+        geocoder.geocode({'address': $scope.address}, function (res, status) {
             if (status === google.maps.GeocoderStatus.OK) {
                 body.latitude = res[0].geometry.location.lat();
                 body.longitude = res[0].geometry.location.lng();
