@@ -32,6 +32,7 @@ var express = require('express'),
     session = require('express-session'),
     flash = require('connect-flash'),
     fs = require('fs'),
+    https = require('https'),
     cassandra = require('cassandra-driver'),
     cassclient = new cassandra.Client({
         contactPoints: ['127.0.0.1'],
@@ -67,6 +68,18 @@ function get_centre(country, site) {
         ret = {latitude: 0, longitude: 0};
     }
     return ret;
+}
+
+function gen_scheduler_opts(uri) {
+    var options = {
+        hostname: '52.18.248.196',
+        port: 9099,
+        path: uri,
+        rejectUnauthorized: false,
+        pfx: fs.readFileSync(__dirname + '/client.p12')
+    };
+    options.agent = new https.Agent(options);
+    return options;
 }
 
 /*jslint nomen:true*/
@@ -326,6 +339,41 @@ app.get('/node_interfaces/:country/:site/:nodeid', function (req, res) {
                 res.json(data.rows);
             }
         });
+});
+
+app.post('/resynchronise_db', function (req, res) {
+    console.log("Body:", req.body);
+    if ((req.body.username !== "monroeadmin") || (req.body.password !== "monroeadmin")) {
+        res.status(500).send("Unauthorized user credentials!");
+    } else {
+        https.get(gen_scheduler_opts('/v1/resources'), function (sched_res) {
+            console.log("statusCode: ", sched_res.statusCode);
+            sched_res.on('data', function (data) {
+                var i, len,
+                    info = JSON.parse(data.toString()),
+                    queries = [],
+                    query = "INSERT INTO devices (nodeid,hostname,status) VALUES (?,?,?)";
+                for (i = 0, len = info.length; i < len; i += 1) {
+                    queries.push({
+                        query: query,
+                        params: [info[i].id, info[i].hostname, info[i].status]
+                    });
+                }
+                console.log("queries", queries);
+                cassclient.batch(queries, {prepare: true}, function (err) {
+                    if (err) {
+                        console.log("Error:", err.message);
+                        res.status(500).send(err.message);
+                    } else {
+                        res.sendStatus(201);
+                    }
+                });
+            });
+        }).on('error', function (e) {
+            console.log("Error:", e);
+            res.status(500).send(e);
+        });
+    }
 });
 
 app.get('/rtt/:nodeid/:ifaceid/:timestamp/:mintimestamp/:resolution', function (req, res) {

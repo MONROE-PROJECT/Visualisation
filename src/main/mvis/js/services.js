@@ -81,6 +81,10 @@ mvisServices.service('mvisService', ['$http', function ($http) {
         return $http.post('/register_device', body);
     };
 
+    this.resynchoniseDb = function (body) {
+        return $http.post('/resynchronise_db', body);
+    };
+
     this.getNodesName = function (country, site) {
         return $http.get('/nodes_name/' + country + '/' + site);
     };

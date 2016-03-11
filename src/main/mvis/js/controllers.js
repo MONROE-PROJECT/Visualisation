@@ -172,7 +172,6 @@ mvisControllers.controller('sideMgmtController', ['$scope', '$state', 'mvisServi
         }
     };
 
-
     $scope.submit = function () {
         var geocoder = new google.maps.Geocoder(),
             t = $scope.testbed.selected.id.replace(" - ", "-").split("-"),
@@ -204,6 +203,21 @@ mvisControllers.controller('sideMgmtController', ['$scope', '$state', 'mvisServi
                     $state.go('error', {error: error});
                 });
         });
+    };
+
+    $scope.resynch = function () {
+        var body = {
+            username: $scope.username,
+            password: $scope.password
+        };
+        mvisService.resynchoniseDb(body)
+            .success(function () {
+                alert("Resynchronisation success!");
+                $state.reload();
+            })
+            .error(function (error) {
+                $state.go('error', {error: error});
+            });
     };
 }]);
 
