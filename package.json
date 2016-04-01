@@ -12,7 +12,7 @@
     "url": "https://rmonno@bitbucket.org/ozgualay/monroe-visualisation.git"
   },
   "dependencies": {
-    "cassandra-driver": "~2.2.2",
+    "cassandra-driver": "~3.0",
     "underscore": "~1.8.3"
   },
   "devDependencies": {
