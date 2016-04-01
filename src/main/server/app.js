@@ -72,8 +72,7 @@ function get_centre(country, site) {
 
 function gen_scheduler_opts(uri) {
     var options = {
-        hostname: '52.18.248.196',
-        port: 9099,
+        hostname: '163.117.140.155',
         path: uri,
         rejectUnauthorized: false,
         pfx: fs.readFileSync(__dirname + '/client.p12')

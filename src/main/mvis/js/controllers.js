@@ -175,12 +175,13 @@ mvisControllers.controller('sideMgmtController', ['$scope', '$state', 'mvisServi
     $scope.submit = function () {
         var geocoder = new google.maps.Geocoder(),
             t = $scope.testbed.selected.id.replace(" - ", "-").split("-"),
+            interfaces = (typeof $scope.interfaces === "undefined") ? "wwan0, usb0, usb1, usb1" : $scope.interfaces,
             body = {
                 username: $scope.username,
                 password: $scope.password,
                 nodeid: $scope.nodeid,
                 nodename: $scope.nodename,
-                interfaces: $scope.interfaces,
+                interfaces: interfaces,
                 country: t[0],
                 site: t[1],
                 address: $scope.address,
