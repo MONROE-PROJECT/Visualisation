@@ -174,8 +174,8 @@ mvisControllers.controller('sideMgmtController', ['$scope', '$state', 'mvisServi
 
     $scope.submit = function () {
         var geocoder = new google.maps.Geocoder(),
-            t = $scope.testbed.selected.id.replace(" - ", "-").split("-"),
-            interfaces = (typeof $scope.interfaces === "undefined") ? "wwan0, usb0, usb1, usb1" : $scope.interfaces,
+            t = $scope.testbed.selected.id.replace(/\s/g, "").split("-"),
+            interfaces = (typeof $scope.interfaces === "undefined") ? "wwan0,usb0,usb1,usb2" : $scope.interfaces,
             body = {
                 username: $scope.username,
                 password: $scope.password,
@@ -773,7 +773,7 @@ mvisControllers.controller('statPeriodicController', ['$scope', '$stateParams', 
 
     function createTracker(info) {
         var gmap = new google.maps.Map(document.getElementById('map'), {
-                zoom: 15,
+                zoom: 10,
                 center: {lat: info.centre.lat, lng: info.centre.lng}
             }),
             polyline = new google.maps.Polyline({

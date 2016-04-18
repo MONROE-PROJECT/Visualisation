@@ -50,7 +50,7 @@ cassclient.on('log', function (level, className, message, furtherInfo) {
 function get_centre(country, site) {
     var ret;
 
-    if (country === "italy" && site === "pisa") {
+    if (country === "Italy" && site === "Pisa") {
         ret = {latitude: 43.6814584, longitude: 10.353148199999964};
 
     } else if (country === "Norway" && site === "Celerway") {
@@ -62,7 +62,7 @@ function get_centre(country, site) {
     } else if (country === "Sweden" && site === "Karlstad") {
         ret = {latitude: 59.406479, longitude: 13.580814099999998};
 
-    } else if (country === "italy" && site === "turin") {
+    } else if (country === "Italy" && site === "Turin") {
         ret = {latitude: 45.0625527, longitude: 7.662398400000029};
     } else {
         ret = {latitude: 0, longitude: 0};
@@ -154,8 +154,8 @@ app.get('/states_location', function (req, res) {
     var info = [
         {
             'name': "Pisa @ Italy (Nextworks)",
-            'country': "italy",
-            'site': "pisa",
+            'country': "Italy",
+            'site': "Pisa",
             'latitude': 43.6814584,
             'longitude': 10.353148199999964
         }, {
@@ -178,8 +178,8 @@ app.get('/states_location', function (req, res) {
             'longitude': 13.580814099999998
         }, {
             'name': "Torino @ Italy (Politecnico di Torino)",
-            'country': "italy",
-            'site': "turin",
+            'country': "Italy",
+            'site': "Turin",
             'latitude': 45.0625527,
             'longitude': 7.662398400000029
         }
@@ -238,7 +238,7 @@ app.get('/nodelastactivity/:nodeid/:interfaces', function (req, res) {
 
     // prepared query to the CASSANDRA-DB
     query = 'SELECT timestamp FROM monroe_exp_ping WHERE dataversion = ? AND nodeid = ? AND interfacename IN ? ORDER BY timestamp DESC LIMIT 1';
-    cassclient.execute(query, [dataversion, req.params.nodeid, interfaces], {prepare: true}, function (err, data) {
+    cassclient.execute(query, [dataversion, req.params.nodeid, interfaces], {prepare: true, fetchSize: 0}, function (err, data) {
         if (err) {
             console.log("Error:", err.message);
         } else {
@@ -253,7 +253,7 @@ app.get('/nodelastactivity/:nodeid/:interfaces', function (req, res) {
 
     // prepared query to the CASSANDRA-DB
     query = 'SELECT timestamp FROM monroe_meta_device_modem WHERE dataversion = ? AND nodeid = ? AND interfacename IN ? ORDER BY timestamp DESC LIMIT 1';
-    cassclient.execute(query, [dataversion, req.params.nodeid, interfaces], {prepare: true}, function (err, data) {
+    cassclient.execute(query, [dataversion, req.params.nodeid, interfaces], {prepare: true, fetchSize: 0}, function (err, data) {
         if (err) {
             console.log("Error:", err.message);
         } else {
@@ -449,7 +449,7 @@ app.get('/connectiontype/:nodeid/:ifaceid/:timestamp/:mintimestamp/:resolution',
     var threshold = Math.floor(req.params.timestamp / 1000),
         minthreshold = Math.floor(req.params.mintimestamp / 1000),
         table = 'monroe_meta_device_modem',
-        query = 'SELECT mode FROM ' + table + ' WHERE dataversion = ? AND nodeid = ? AND interfacename = ? AND timestamp <= ? AND timestamp >= ? ORDER BY timestamp DESC LIMIT ?';
+        query = 'SELECT devicemode FROM ' + table + ' WHERE dataversion = ? AND nodeid = ? AND interfacename = ? AND timestamp <= ? AND timestamp >= ? ORDER BY timestamp DESC LIMIT ?';
 
     cassclient.execute(query, [dataversion, req.params.nodeid, req.params.ifaceid, threshold, minthreshold, req.params.resolution],
                        {prepare: true}, function (err, data) {
@@ -460,7 +460,7 @@ app.get('/connectiontype/:nodeid/:ifaceid/:timestamp/:mintimestamp/:resolution',
                 console.log("CONNECTIONTYPE(", req.params.nodeid, ":", req.params.ifaceid, ") data", JSON.stringify(data));
                 var i, len, type, info = [], tmp = {};
                 for (i = 0, len = data.rows.length; i < len; i += 1) {
-                    type = convertConnectionType(data.rows[i].mode);
+                    type = convertConnectionType(data.rows[i].devicemode);
                     if (tmp.hasOwnProperty(type)) {
                         tmp[type] += 1;
                     } else {
@@ -487,7 +487,7 @@ app.get('/signalstrength/:nodeid/:ifaceid/:timestamp/:mintimestamp/:resolution',
     var threshold = Math.floor(req.params.timestamp / 1000),
         minthreshold = Math.floor(req.params.mintimestamp / 1000),
         table = 'monroe_meta_device_modem',
-        query = 'SELECT timestamp, signalstrength FROM ' + table + ' WHERE dataversion = ? AND nodeid = ? AND interfacename = ? AND timestamp <= ? AND timestamp >= ? ORDER BY timestamp DESC LIMIT ?';
+        query = 'SELECT timestamp, rssi FROM ' + table + ' WHERE dataversion = ? AND nodeid = ? AND interfacename = ? AND timestamp <= ? AND timestamp >= ? ORDER BY timestamp DESC LIMIT ?';
 
     cassclient.execute(query, [dataversion, req.params.nodeid, req.params.ifaceid, threshold, minthreshold, req.params.resolution],
                        {prepare: true}, function (err, data) {
@@ -499,7 +499,7 @@ app.get('/signalstrength/:nodeid/:ifaceid/:timestamp/:mintimestamp/:resolution',
                 var i, len, info = [];
                 for (i = 0, len = data.rows.length; i < len; i += 1) {
                     // It is needed to convert the data in msecs!
-                    info.unshift([Math.floor(data.rows[i].timestamp * 1000), data.rows[i].signalstrength]);
+                    info.unshift([Math.floor(data.rows[i].timestamp * 1000), data.rows[i].rssi]);
                 }
                 res.json(info);
             }
