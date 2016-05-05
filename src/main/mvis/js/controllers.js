@@ -672,10 +672,7 @@ mvisControllers.controller('statPeriodicController', ['$scope', '$stateParams', 
 
     // this is the (real) management task
     var rttchart, signalstrengthchart,
-        nodeid = mvisService.decomposeNodeId($stateParams.nodeid),
-        rttBuffer = [],
-        signalBuffer = [],
-        gpsBuffer = [];
+        nodeid = mvisService.decomposeNodeId($stateParams.nodeid);
 
     function createTracker(info, inivalues) {
         var gmap = new google.maps.Map(document.getElementById('map'), {
@@ -762,7 +759,7 @@ mvisControllers.controller('statPeriodicController', ['$scope', '$stateParams', 
         $scope.timers.push(timer);
     }
 
-    function rttPeriodicLoadData(nodeid, ifaceid, series) {
+    function rttPeriodicLoadData(nodeid, ifaceid, series, buffer) {
         console.log("rttLoadData series", ifaceid);
         var i, len, timer, slicedata,
             timestamp = new Date().getTime(),
@@ -775,17 +772,17 @@ mvisControllers.controller('statPeriodicController', ['$scope', '$stateParams', 
                 series.setData(slicedata, true, true);
 
                 slicedata = data.slice(parseInt(data.length / 2, 10), data.length);
-                rttBuffer.push.apply(rttBuffer, slicedata);
+                buffer.push.apply(buffer, slicedata);
 
-                periodicUpdateBuffer(nodeid, ifaceid, timestamp, mintimestamp, 59, mvisService.getRTT, rttBuffer);
-                periodicDrawBuffer(series, 1, rttBuffer, "RTT");
+                periodicUpdateBuffer(nodeid, ifaceid, timestamp, mintimestamp, 59, mvisService.getRTT, buffer);
+                periodicDrawBuffer(series, 1, buffer, "RTT");
             })
             .error(function (error) {
                 $state.go('error', {error: error});
             });
     }
 
-    function signalstrengthPeriodicLoadData(nodeid, ifaceid, series) {
+    function signalstrengthPeriodicLoadData(nodeid, ifaceid, series, buffer) {
         console.log("signalstrengthPeriodicLoadData series", ifaceid);
         var i, len, timer, slicedata,
             timestamp = new Date().getTime(),
@@ -798,10 +795,10 @@ mvisControllers.controller('statPeriodicController', ['$scope', '$stateParams', 
                 series.setData(data, true, true);
 
                 slicedata = data.slice(parseInt(data.length / 2, 10), data.length);
-                signalBuffer.push.apply(signalBuffer, slicedata);
+                buffer.push.apply(buffer, slicedata);
 
-                periodicUpdateBuffer(nodeid, ifaceid, timestamp, mintimestamp, 59, mvisService.getSignalStrength, signalBuffer);
-                periodicDrawBuffer(series, 1, signalBuffer, "SignalStrength");
+                periodicUpdateBuffer(nodeid, ifaceid, timestamp, mintimestamp, 59, mvisService.getSignalStrength, buffer);
+                periodicDrawBuffer(series, 1, buffer, "SignalStrength");
             })
             .error(function (error) {
                 $state.go('error', {error: error});
@@ -811,7 +808,8 @@ mvisControllers.controller('statPeriodicController', ['$scope', '$stateParams', 
     function gpsPeriodicLoadData(country, site, nodeid) {
         var tracker, timer, i, len, slicedata,
             timestamp = new Date().getTime(),
-            mintimestamp = mvisService.getMinTimestamp(timestamp, "1 hour before");
+            mintimestamp = mvisService.getMinTimestamp(timestamp, "1 hour before"),
+            gpsBuffer = [];
 
         mvisService.getGps(country, site, nodeid, timestamp, mintimestamp, 118)
             .success(function (info) {
@@ -844,8 +842,8 @@ mvisControllers.controller('statPeriodicController', ['$scope', '$stateParams', 
                 }
             });
             return ret;
-        }, function (series) {
-            rttPeriodicLoadData(nodeid, series.name, series);
+        }, function (series, buffer) {
+            rttPeriodicLoadData(nodeid, series.name, series, buffer);
         });
     }
 
@@ -863,8 +861,8 @@ mvisControllers.controller('statPeriodicController', ['$scope', '$stateParams', 
                 }
             });
             return ret;
-        }, function (series) {
-            signalstrengthPeriodicLoadData(nodeid, series.name, series);
+        }, function (series, buffer) {
+            signalstrengthPeriodicLoadData(nodeid, series.name, series, buffer);
         });
     }
 

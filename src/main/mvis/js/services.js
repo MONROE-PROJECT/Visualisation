@@ -172,11 +172,14 @@ mvisServices.service('mvisService', ['$http', function ($http) {
                         var i, series = [];
                         for (i = 0; i < this.series.length; i += 1) {
                             if (this.series[i].name !== "Navigator") {
-                                series.push(this.series[i]);
+                                series.push({
+                                    s: this.series[i],
+                                    b: []
+                                });
                             }
                         }
                         for (i = 0; i < series.length; i += 1) {
-                            loadcallback(series[i]);
+                            loadcallback(series[i].s, series[i].b);
                         }
                     }
                 }
@@ -270,11 +273,14 @@ mvisServices.service('mvisService', ['$http', function ($http) {
                         var i, series = [];
                         for (i = 0; i < this.series.length; i += 1) {
                             if (this.series[i].name !== "Navigator") {
-                                series.push(this.series[i]);
+                                series.push({
+                                    s: this.series[i],
+                                    b: []
+                                });
                             }
                         }
                         for (i = 0; i < series.length; i += 1) {
-                            loadcallback(series[i]);
+                            loadcallback(series[i].s, series[i].b);
                         }
                     }
                 }
