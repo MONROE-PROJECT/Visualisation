@@ -38,8 +38,56 @@
                 <input type="text" class="form-control" id="nodename" ng-model="nodename" placeholder="Test-node-1">
             </div>
             <div class="form-group">
-                <label for="interfaces">Interfaces</label>
-                <input type="text" class="form-control" id="interfaces" ng-model="interfaces" placeholder="Comma separated ifs, e.g. eth0, eth1">
+                <label for="management">Management</label>
+                <div class="inline-row">
+                    <ui-select ng-model="mngmtOperators.selected" theme="select2" ng-disabled="disabled" on-select="mngmtOperatorsSelected($model)">
+                    <ui-select-match placeholder="Select an operators">{{$select.selected.id}}</ui-select-match>
+                        <ui-select-choices repeat="o in mngmtOperators | filter: {id: $select.search}">
+                            <div ng-bind-html="o.id | highlight: $select.search"></div>
+                        </ui-select-choices>
+                    </ui-select>
+                    <input type="text" id="mngmtICCID" ng-model="mngmtICCID" placeholder="Management iccid">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="eth0">Eth0</label>
+                <input type="text" class="form-control" id="eth0ID" ng-model="eth0ID" placeholder="Eth0 identifier">
+            </div>
+            <div class="form-group">
+                <label for="wifimodem1">Wifi Modem (1)</label>
+                <div class="inline-row">
+                    <ui-select ng-model="mifi1Operators.selected" theme="select2" ng-disabled="disabled" on-select="mifi1OperatorsSelected($model)">
+                    <ui-select-match placeholder="Select an operators">{{$select.selected.id}}</ui-select-match>
+                        <ui-select-choices repeat="o in mifi1Operators | filter: {id: $select.search}">
+                            <div ng-bind-html="o.id | highlight: $select.search"></div>
+                        </ui-select-choices>
+                    </ui-select>
+                    <input type="text" id="wifiModem1ICCID" ng-model="wifiModem1ICCID" placeholder="Mifi-1 iccid">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="wifimodem2">Wifi Modem (2)</label>
+                <div class="inline-row">
+                    <ui-select ng-model="mifi2Operators.selected" theme="select2" ng-disabled="disabled" on-select="mifi2OperatorsSelected($model)">
+                    <ui-select-match placeholder="Select an operators">{{$select.selected.id}}</ui-select-match>
+                        <ui-select-choices repeat="o in mifi2Operators | filter: {id: $select.search}">
+                            <div ng-bind-html="o.id | highlight: $select.search"></div>
+                        </ui-select-choices>
+                    </ui-select>
+                    <input type="text" id="wifiModem2ICCID" ng-model="wifiModem2ICCID" placeholder="Mifi-2 iccid">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="wifimodem3">Wifi Modem (3)</label>
+                <div class="inline-row">
+                    <ui-select ng-model="mifi3Operators.selected" theme="select2" ng-disabled="disabled" on-select="mifi3OperatorsSelected($model)">
+                    <ui-select-match placeholder="Select an operators">{{$select.selected.id}}</ui-select-match>
+                        <ui-select-choices repeat="o in mifi3Operators | filter: {id: $select.search}">
+                            <div ng-bind-html="o.id | highlight: $select.search"></div>
+                        </ui-select-choices>
+                    </ui-select>
+                    <input type="text" id="wifiModem3ICCID" ng-model="wifiModem3ICCID" placeholder="Mifi-3 iccid">
+                </div>
             </div>
             <div class="form-group">
                 <label for="testbed">Testbed</label>
@@ -53,10 +101,6 @@
             <div class="form-group">
                 <label for="address">Address</label>
                 <input type="text" class="form-control" id="address" ng-model="address" readonly>
-            </div>
-            <div class="form-group">
-                <label for="status">Status</label>
-                <input type="text" class="form-control" id="status" ng-model="status" placeholder="TEST">
             </div>
 
             <button class="btn btn-primary" ng-click="submit()">Submit</button>

@@ -149,6 +149,34 @@ mvisControllers.controller('sideMgmtController', ['$scope', '$state', 'mvisServi
         {id: "Sweden - Karlstad - KAU"}
     ];
 
+    $scope.mngmtOperators = [
+        {id: "Wind"},
+        {id: "Tim"},
+        {id: "Vodafone"},
+        {id: "Telenor"},
+        {id: "Orange"},
+        {id: "Orang-World"}
+    ];
+    $scope.mifi1Operators = $scope.mngmtOperators.slice(0);
+    $scope.mifi2Operators = $scope.mngmtOperators.slice(0);
+    $scope.mifi3Operators = $scope.mngmtOperators.slice(0);
+
+    $scope.mngmtOperatorsSelected = function ($model) {
+        $scope.mngmtOperator = $model.id;
+    };
+
+    $scope.mifi1OperatorsSelected = function ($model) {
+        $scope.wifiModem1Operator = $model.id;
+    };
+
+    $scope.mifi2OperatorsSelected = function ($model) {
+        $scope.wifiModem2Operator = $model.id;
+    };
+
+    $scope.mifi3OperatorsSelected = function ($model) {
+        $scope.wifiModem3Operator = $model.id;
+    };
+
     $scope.testbedSelected = function ($model) {
         console.log("Selected testbed", $model.id);
         if ($model.id === "Italy - Pisa - NXW") {
@@ -175,19 +203,47 @@ mvisControllers.controller('sideMgmtController', ['$scope', '$state', 'mvisServi
     $scope.submit = function () {
         var geocoder = new google.maps.Geocoder(),
             t = $scope.testbed.selected.id.replace(/\s/g, "").split("-"),
-            interfaces = (typeof $scope.interfaces === "undefined") ? "wwan0,usb0,usb1,usb2" : $scope.interfaces,
+            ifdetails = {},
+            interfaces = [],
             body = {
                 username: $scope.username,
                 password: $scope.password,
                 nodeid: $scope.nodeid,
                 nodename: $scope.nodename,
-                interfaces: interfaces,
+                nodestatus: "active",
                 country: t[0],
                 site: t[1],
                 address: $scope.address,
-                postcode: $scope.postcode,
-                status: $scope.status
+                postcode: $scope.postcode
             };
+
+        if ($scope.mngmtOperator && $scope.mngmtICCID) {
+            ifdetails.mngmtOperator = $scope.mngmtOperator;
+            ifdetails.mngmtICCID = $scope.mngmtICCID;
+            interfaces.push($scope.mngmtICCID);
+        }
+        if ($scope.eth0ID) {
+            ifdetails.eth0ID = $scope.eth0ID;
+            interfaces.push($scope.eth0ID);
+        }
+        if ($scope.wifiModem1Operator && $scope.wifiModem1ICCID) {
+            ifdetails.wifiModem1Operator = $scope.wifiModem1Operator;
+            ifdetails.wifiModem1ICCID = $scope.wifiModem1ICCID;
+            interfaces.push($scope.wifiModem1ICCID);
+        }
+        if ($scope.wifiModem2Operator && $scope.wifiModem2ICCID) {
+            ifdetails.wifiModem2Operator = $scope.wifiModem2Operator;
+            ifdetails.wifiModem2ICCID = $scope.wifiModem2ICCID;
+            interfaces.push($scope.wifiModem2ICCID);
+        }
+        if ($scope.wifiModem3Operator && $scope.wifiModem3ICCID) {
+            ifdetails.wifiModem3Operator = $scope.wifiModem3Operator;
+            ifdetails.wifiModem3ICCID = $scope.wifiModem3ICCID;
+            interfaces.push($scope.wifiModem3ICCID);
+        }
+
+        body.ifdetails = ifdetails;
+        body.interfaces = interfaces;
 
         geocoder.geocode({'address': $scope.address}, function (res, status) {
             if (status === google.maps.GeocoderStatus.OK) {

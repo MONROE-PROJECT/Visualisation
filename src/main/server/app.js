@@ -288,13 +288,12 @@ app.post('/register_device', function (req, res) {
         res.status(500).send("Unauthorized user credentials!");
     } else {
         // prepared query to the CASSANDRA-DB
-        var query = "INSERT INTO devices (country,site,nodeid,address,displayname,hostname,interfaces,latitude,longitude,modemcount,postcode,status,validfrom,validto)" +
-                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-            interfaces = req.body.interfaces.split(','),
+        var query = "INSERT INTO devices (country,site,nodeid,address,displayname,hostname,interfaces,ifdetails,latitude,longitude,modemcount,postcode,status,validfrom,validto)" +
+                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
             from = new Date(),
             to = new Date(),
-            params = [req.body.country, req.body.site, req.body.nodeid, req.body.address, req.body.nodename, req.body.nodename, interfaces, req.body.latitude,
-                      req.body.longitude, interfaces.length, req.body.postcode, req.body.status, from, to.setMonth(to.getMonth() + 24)];
+            params = [req.body.country, req.body.site, req.body.nodeid, req.body.address, req.body.nodename, req.body.nodename, req.body.interfaces, req.body.ifdetails,
+                      req.body.latitude, req.body.longitude, req.body.interfaces.length, req.body.postcode, req.body.nodestatus, from, to.setMonth(to.getMonth() + 24)];
 
         cassclient.execute(query, params, {prepare: true}, function (err, data) {
             if (err) {
