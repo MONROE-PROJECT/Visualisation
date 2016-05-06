@@ -63,13 +63,12 @@ mvisControllers.controller('mainMgmtController', ['$scope', '$state', '$filter',
                     country: node.country,
                     site: node.site,
                     id: mvisService.composeNodeName(node.nodeid, node.displayname, node.hostname),
-                    address: node.address,
+                    eth0: node.ifdetails.eth0ID,
+                    management: mvisService.composeModemName(node.ifdetails.mngmtOperator, node.ifdetails.mngmtICCID),
+                    mifi1: mvisService.composeModemName(node.ifdetails.wifiModem1Operator, node.ifdetails.wifiModem1ICCID),
+                    mifi2: mvisService.composeModemName(node.ifdetails.wifiModem2Operator, node.ifdetails.wifiModem2ICCID),
+                    mifi3: mvisService.composeModemName(node.ifdetails.wifiModem3Operator, node.ifdetails.wifiModem3ICCID),
                     interfaces: node.interfaces,
-                    latitude: node.latitude,
-                    longitude: node.longitude,
-                    status: node.status,
-                    validfrom: node.validfrom,
-                    validto: node.validto,
                     nodeid: node.nodeid
                 });
             }, $scope.nodes);

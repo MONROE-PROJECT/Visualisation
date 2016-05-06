@@ -38,6 +38,17 @@ mvisServices.service('mvisService', ['$http', function ($http) {
         return name.replace(" - ", "-").split("-")[0];
     };
 
+    this.composeModemName = function (operator, identifier) {
+        var name = "";
+        if (operator) {
+            name += operator + " - ";
+        }
+        if (identifier) {
+            name += identifier;
+        }
+        return name;
+    };
+
     this.getMinTimestamp = function (timestamp, timeslot) {
         var x = timestamp - (60 * 60 * 1000); // 1 hour before
         if (timeslot === "24 hours before") {

@@ -213,7 +213,7 @@ app.get('/region/:country/:site', function (req, res) {
 app.get('/nodes', function (req, res) {
     // prepared query to the CASSANDRA-DB
     var table = 'devices',
-        query = 'SELECT country, site, nodeid, address, displayname, hostname, interfaces, latitude, longitude, status, validfrom, validto FROM ' + table;
+        query = 'SELECT country, site, nodeid, displayname, hostname, interfaces, ifdetails FROM ' + table;
 
     cassclient.execute(query, [], {prepare: true}, function (err, data) {
         if (err) {
