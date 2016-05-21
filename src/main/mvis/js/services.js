@@ -128,6 +128,10 @@ mvisServices.service('mvisService', ['$http', function ($http) {
         return $http.get('/signalstrength/' + nodeid + '/' + ifaceid + '/' + timestamp + "/" + mintimestamp + "/" + resolution);
     };
 
+    this.getHttpSpeed = function (nodeid, ifaceid, timestamp, mintimestamp, resolution) {
+        return $http.get('/httpspeed/' + nodeid + '/' + ifaceid + '/' + timestamp + "/" + mintimestamp + "/" + resolution);
+    };
+
     this.getCPU = function (nodeid, timestamp, mintimestamp, resolution) {
         return $http.get('/cpu/' + nodeid + '/' + timestamp + "/" + mintimestamp + "/" + resolution);
     };
@@ -314,6 +318,83 @@ mvisServices.service('mvisService', ['$http', function ($http) {
                         states: {
                             hover: {enabled: true}
                         }
+                    }
+                }
+            },
+            series: initcallback()
+        });
+    };
+
+    this.createHttpSpeedStockChart = function (initcallback, loadcallback) {
+        return new Highcharts.StockChart({
+            chart: {
+                renderTo: 'http-speed-chart',
+                type: 'scatter',
+                zoomType: 'xy',
+                events: {
+                    load: function () {
+                        var i, series = [];
+                        for (i = 0; i < this.series.length; i += 1) {
+                            if (this.series[i].name !== "Navigator") {
+                                series.push({
+                                    s: this.series[i],
+                                    b: []
+                                });
+                            }
+                        }
+                        for (i = 0; i < series.length; i += 1) {
+                            loadcallback(series[i].s, series[i].b);
+                        }
+                    }
+                }
+            },
+            title: {text: ''},
+            xAxis: {
+                type: 'datetime',
+                labels: {
+                    overflow: 'justify',
+                    format: '{value:%Y/%m/%d %H:%M:%S}',
+                    align: 'right',
+                    rotation: -30
+                }
+            },
+            yAxis: {title: {text: 'SPEED (b/sec)'}},
+            legend: {enabled: true},
+            rangeSelector: {
+                buttons: [{
+                    count: 1,
+                    type: 'minute',
+                    text: '1M'
+                }, {
+                    count: 5,
+                    type: 'minute',
+                    text: '5M'
+                }, {
+                    type: 'all',
+                    text: 'All'
+                }],
+                inputEnabled: true,
+                selected: 2
+            },
+            plotOptions: {
+                scatter: {
+                    marker: {
+                        radius: 5,
+                        states: {
+                            hover: {
+                                enabled: true,
+                                lineColor: 'rgb(100,100,100)'
+                            }
+                        }
+                    },
+                    states: {
+                        hover: {
+                            marker: {enabled: true}
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<b>{series.name}</b><br>',
+                        pointFormat: '{point.x} , {point.y} (b/sec)'
                     }
                 }
             },

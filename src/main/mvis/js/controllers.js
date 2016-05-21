@@ -775,13 +775,14 @@ mvisControllers.controller('statPeriodicController', ['$scope', '$stateParams', 
     $scope.timers = [];
 
     // this is the (real) management task
-    var rttchart, signalstrengthchart, cpuchart,
+    var rttchart, signalstrengthchart, cpuchart, httpspeedchart,
         nodeid = mvisService.decomposeNodeId($stateParams.nodeid);
 
     function createTracker(info, inivalues) {
-        var gmap = new google.maps.Map(document.getElementById('map'), {
+        var center = (info.current.lat && info.current.lng) ? {lat: info.current.lat, lng: info.current.lng} : {lat: info.centre.lat, lng: info.centre.lng},
+            gmap = new google.maps.Map(document.getElementById('map'), {
                 zoom: 10,
-                center: {lat: info.centre.lat, lng: info.centre.lng}
+                center: center
             }),
             polyline = new google.maps.Polyline({
                 path: inivalues,
@@ -790,19 +791,12 @@ mvisControllers.controller('statPeriodicController', ['$scope', '$stateParams', 
                 strokeOpacity: 1.0,
                 strokeWeight: 2
             }),
-            position = new google.maps.LatLng(info.current.lat, info.current.lng),
             marker = new google.maps.Marker({
-                position: position,
+                position: new google.maps.LatLng(info.current.lat, info.current.lng),
                 title: "Lat: " + info.current.lat + ", Lng: " + info.current.lng,
                 map: gmap
-            }),
-            bounds = new google.maps.LatLngBounds();
+            });
         polyline.setMap(gmap);
-        bounds.extend(position);
-
-        gmap.fitBounds(bounds);
-        gmap.panToBounds(bounds);
-
         return {gmap: gmap, polyline: polyline, marker: marker};
     }
 
@@ -932,6 +926,29 @@ mvisControllers.controller('statPeriodicController', ['$scope', '$stateParams', 
             });
     }
 
+    function httpSpeedPeriodicLoadData(nodeid, ifaceid, series, buffer) {
+        console.log("httpSpeedPeriodicLoadData series", ifaceid);
+        var slicedata,
+            timestamp = new Date().getTime(),
+            mintimestamp = mvisService.getMinTimestamp(timestamp, "1 hour before");
+
+        mvisService.getHttpSpeed(nodeid, ifaceid, timestamp, mintimestamp, 118)
+            .success(function (data) {
+                console.log("HTTPSPEED(", data.length, "): ", data);
+                slicedata = data.slice(0, parseInt(data.length / 2, 10));
+                series.setData(slicedata, true, true);
+
+                slicedata = data.slice(parseInt(data.length / 2, 10), data.length);
+                buffer.push.apply(buffer, slicedata);
+
+                periodicUpdateBuffer(nodeid, ifaceid, timestamp, 59, mvisService.getHttpSpeed, buffer);
+                periodicDrawBuffer(series, 1, buffer, "HttpSpeed");
+            })
+            .error(function (error) {
+                $state.go('error', {error: error});
+            });
+    }
+
     function cpuPeriodicLoadData(nodeid, name, series, buffer) {
         console.log("cpuPeriodicLoadData series", name);
         var slicedata,
@@ -1029,6 +1046,25 @@ mvisControllers.controller('statPeriodicController', ['$scope', '$stateParams', 
         });
     }
 
+    function getPeriodicAllHttpSpeed(nodeid, ifaces) {
+        console.log("getPeriodicAllHttpSpeed nodeid", nodeid, ", ifaces", ifaces);
+        httpspeedchart = mvisService.createHttpSpeedStockChart(function () {
+            var i, ret = [];
+            angular.forEach(ifaces, function (ifs) {
+                for (i = 0; i < ifs.interfaces.length; i += 1) {
+                    ret.push({
+                        type: "scatter",
+                        name: ifs.interfaces[i],
+                        data: []
+                    });
+                }
+            });
+            return ret;
+        }, function (series, buffer) {
+            httpSpeedPeriodicLoadData(nodeid, series.name, series, buffer);
+        });
+    }
+
     // this is the (real) management task
     mvisService.getInterfaces($stateParams.country, $stateParams.site, nodeid)
         .success(function (ifaces) {
@@ -1036,6 +1072,7 @@ mvisControllers.controller('statPeriodicController', ['$scope', '$stateParams', 
 
             getPeriodicAllRTT(nodeid, ifaces);
             getPeriodicAllSignalStrength(nodeid, ifaces);
+            getPeriodicAllHttpSpeed(nodeid, ifaces);
             getPeriodicAllCpu(nodeid);
         })
         .error(function (error) {
