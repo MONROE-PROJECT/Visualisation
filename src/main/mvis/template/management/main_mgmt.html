@@ -23,11 +23,10 @@
             <td data-title="'Country'" sortable="'country'" filter="{'country': 'text'}">{{n.country}}</td>
             <td data-title="'Site'">{{n.site}}</td>
             <td data-title="'Id'" sortable="'id'" filter="{'id': 'text'}">{{n.id}}</td>
-            <td data-title="'Management'">{{n.management}}</td>
-            <td data-title="'Eth0'">{{n.eth0}}</td>
-            <td data-title="'Mifi-1'">{{n.mifi1}}</td>
-            <td data-title="'Mifi-2'">{{n.mifi2}}</td>
-            <td data-title="'Mifi-3'">{{n.mifi3}}</td>
+            <td data-title="'Device0'">{{n.device0}}</td>
+            <td data-title="'Device1'">{{n.device1}}</td>
+            <td data-title="'Device2'">{{n.device2}}</td>
+            <td data-title="'Device3'">{{n.device3}}</td>
         </tr>
     </table>
 </div>
@@ -38,7 +37,7 @@
     <input type="text" class="form-control" id="selNodeId" ng-model="selNodeId" placeholder="Select a node id (e.g 1, 2, 109...)">
 </div>
 <div class="form-group">
-    <button class="btn btn-primary" ng-click="getNodeDetails()">Get-last Trace</button>
+    <button class="btn btn-primary" ng-click="getNodeDetails()">Get-Trace</button>
 </div>
 
 <div>
@@ -48,6 +47,17 @@
             <td data-title="'Ping'">{{d.ping}}</td>
             <td data-title="'Modem'">{{d.modem}}</td>
             <td data-title="'Gps'">{{d.gps}}</td>
+        </tr>
+    </table>
+</div>
+
+<hr>
+
+<div>
+    <table ng-table="nodesDetailsTable" show-filter="true" class="table table-condensed table-bordered table-striped">
+        <tr ng-repeat="n in nodesDataDetails">
+            <td data-title="'Id'" sortable="'id'" filter="{'id': 'text'}">{{n.id}}</td>
+            <td data-title="'Interface'">{{n.interfaces}}</td>
         </tr>
     </table>
 </div>

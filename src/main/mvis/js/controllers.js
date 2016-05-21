@@ -59,22 +59,24 @@ mvisControllers.controller('mainMgmtController', ['$scope', '$state', '$filter',
             $scope.nodes = [];
             angular.forEach(data, function (node) {
                 console.log("Node info: ", node);
-                this.push({
+                var ret = {
                     country: node.country,
                     site: node.site,
                     id: mvisService.composeNodeName(node.nodeid, node.displayname, node.hostname),
-                    eth0: node.ifdetails.eth0ID,
-                    management: mvisService.composeModemName(node.ifdetails.mngmtOperator, node.ifdetails.mngmtICCID),
-                    mifi1: mvisService.composeModemName(node.ifdetails.wifiModem1Operator, node.ifdetails.wifiModem1ICCID),
-                    mifi2: mvisService.composeModemName(node.ifdetails.wifiModem2Operator, node.ifdetails.wifiModem2ICCID),
-                    mifi3: mvisService.composeModemName(node.ifdetails.wifiModem3Operator, node.ifdetails.wifiModem3ICCID),
                     interfaces: node.interfaces,
                     nodeid: node.nodeid
-                });
+                };
+                if (node.ifdetails) {
+                    ret.device0 = mvisService.composeModemName(node.ifdetails.device0Operator, node.ifdetails.device0ICCID);
+                    ret.device1 = mvisService.composeModemName(node.ifdetails.device1Operator, node.ifdetails.device1ICCID);
+                    ret.device2 = mvisService.composeModemName(node.ifdetails.device2Operator, node.ifdetails.device2ICCID);
+                    ret.device3 = mvisService.composeModemName(node.ifdetails.device3Operator, node.ifdetails.device3ICCID);
+                }
+                this.push(ret);
             }, $scope.nodes);
 
             $scope.nodesTable = new NgTableParams({
-                count: 20
+                count: 10
             }, {
                 counts: [],
                 total: $scope.nodes.length,
@@ -83,6 +85,19 @@ mvisControllers.controller('mainMgmtController', ['$scope', '$state', '$filter',
                     $scope.nodesData = params.filter() ? $filter('filter')($scope.nodesData, params.filter()) : $scope.nodes;
                     $scope.nodesData = $scope.nodesData.slice((params.page() - 1) * params.count(), params.page() * params.count());
                     $defer.resolve($scope.nodesData);
+                }
+            });
+
+            $scope.nodesDetailsTable = new NgTableParams({
+                count: 5
+            }, {
+                counts: [],
+                total: $scope.nodes.length,
+                getData: function ($defer, params) {
+                    $scope.nodesDataDetails = params.sorting() ? $filter('orderBy')($scope.nodes, params.orderBy()) : $scope.nodes;
+                    $scope.nodesDataDetails = params.filter() ? $filter('filter')($scope.nodesDataDetails, params.filter()) : $scope.nodes;
+                    $scope.nodesDataDetails = $scope.nodesDataDetails.slice((params.page() - 1) * params.count(), params.page() * params.count());
+                    $defer.resolve($scope.nodesDataDetails);
                 }
             });
         })
@@ -103,6 +118,8 @@ mvisControllers.controller('mainMgmtController', ['$scope', '$state', '$filter',
         }
     });
 
+    var tmpret = {id: null, ping: null, modem: null, gps: null};
+
     $scope.getNodeDetails = function () {
         var i, interfaces,
             nodeid = parseInt($scope.selNodeId, 10);
@@ -113,20 +130,50 @@ mvisControllers.controller('mainMgmtController', ['$scope', '$state', '$filter',
         }
         console.log("NodeId", nodeid, "Interfaces", interfaces);
         if (interfaces) {
-            mvisService.getNodeLastActivity(nodeid, interfaces)
-                .success(function (data) {
-                    angular.forEach(data, function (detail) {
-                        console.log("Node detail", detail);
-                        this.push({
-                            id: detail.nodeid,
-                            ping: (detail.ping) ? new Date(parseInt(detail.ping, 10) * 1000).toUTCString() : detail.ping,
-                            modem: (detail.modem) ? new Date(parseInt(detail.modem, 10) * 1000).toUTCString() : detail.modem,
-                            gps: (detail.gps) ? new Date(parseInt(detail.gps, 10) * 1000).toUTCString() : detail.gps
-                        });
-                    }, $scope.details);
+            tmpret = {id: nodeid, ping: null, modem: null, gps: null};
 
-                    $scope.nodeActivity.total($scope.details.length);
-                    $scope.nodeActivity.reload();
+            mvisService.getNodeLastActivityRTT(nodeid, interfaces)
+                .success(function (data) {
+                    console.log("LastActivityRTT", data);
+                    tmpret.ping = (data.timestamp) ? new Date(parseInt(data.timestamp, 10) * 1000).toUTCString() : "0";
+                    tmpret.ping += " (" + data.iccid + ")";
+
+                    if (tmpret.modem && tmpret.gps) {
+                        $scope.details.push(tmpret);
+                        $scope.nodeActivity.total($scope.details.length);
+                        $scope.nodeActivity.reload();
+                    }
+                })
+                .error(function (error) {
+                    $state.go('error', {error: error});
+                });
+
+            mvisService.getNodeLastActivityMODEM(nodeid, interfaces)
+                .success(function (data) {
+                    console.log("LastActivityModem", data);
+                    tmpret.modem = (data.timestamp) ? new Date(parseInt(data.timestamp, 10) * 1000).toUTCString() : "0";
+                    tmpret.modem += " (" + data.iccid + ")";
+
+                    if (tmpret.ping && tmpret.gps) {
+                        $scope.details.push(tmpret);
+                        $scope.nodeActivity.total($scope.details.length);
+                        $scope.nodeActivity.reload();
+                    }
+                })
+                .error(function (error) {
+                    $state.go('error', {error: error});
+                });
+
+            mvisService.getNodeLastActivityGPS(nodeid)
+                .success(function (data) {
+                    console.log("LastActivityGPS", data);
+                    tmpret.gps = (data.timestamp) ? new Date(parseInt(data.timestamp, 10) * 1000).toUTCString() : "0";
+
+                    if (tmpret.ping && tmpret.modem) {
+                        $scope.details.push(tmpret);
+                        $scope.nodeActivity.total($scope.details.length);
+                        $scope.nodeActivity.reload();
+                    }
                 })
                 .error(function (error) {
                     $state.go('error', {error: error});
@@ -143,12 +190,12 @@ mvisControllers.controller('sideMgmtController', ['$scope', '$state', 'mvisServi
         {id: "Italy - Pisa - NXW"},
         {id: "Italy - Turin - POLITO"},
         {id: "Italy - Turin - GTT"},
-        {id: "Spain - IMDEA - IMDEA"},
-        {id: "Norway - Celerway - CWY"},
+        {id: "Spain - Madrid - IMDEA"},
+        {id: "Norway - Oslo - CWY"},
         {id: "Sweden - Karlstad - KAU"}
     ];
 
-    $scope.mngmtOperators = [
+    $scope.device0Operators = [
         {id: "Wind"},
         {id: "Tim"},
         {id: "Vodafone"},
@@ -156,24 +203,24 @@ mvisControllers.controller('sideMgmtController', ['$scope', '$state', 'mvisServi
         {id: "Orange"},
         {id: "Orang-World"}
     ];
-    $scope.mifi1Operators = $scope.mngmtOperators.slice(0);
-    $scope.mifi2Operators = $scope.mngmtOperators.slice(0);
-    $scope.mifi3Operators = $scope.mngmtOperators.slice(0);
+    $scope.device1Operators = $scope.device0Operators.slice(0);
+    $scope.device2Operators = $scope.device0Operators.slice(0);
+    $scope.device3Operators = $scope.device0Operators.slice(0);
 
-    $scope.mngmtOperatorsSelected = function ($model) {
-        $scope.mngmtOperator = $model.id;
+    $scope.device0OperatorsSelected = function ($model) {
+        $scope.device0Operator = $model.id;
     };
 
-    $scope.mifi1OperatorsSelected = function ($model) {
-        $scope.wifiModem1Operator = $model.id;
+    $scope.device1OperatorsSelected = function ($model) {
+        $scope.device1Operator = $model.id;
     };
 
-    $scope.mifi2OperatorsSelected = function ($model) {
-        $scope.wifiModem2Operator = $model.id;
+    $scope.device2OperatorsSelected = function ($model) {
+        $scope.device2Operator = $model.id;
     };
 
-    $scope.mifi3OperatorsSelected = function ($model) {
-        $scope.wifiModem3Operator = $model.id;
+    $scope.device3OperatorsSelected = function ($model) {
+        $scope.device3Operator = $model.id;
     };
 
     $scope.testbedSelected = function ($model) {
@@ -187,10 +234,10 @@ mvisControllers.controller('sideMgmtController', ['$scope', '$state', 'mvisServi
         } else if ($model.id === "Italy - Turin - GTT") {
             $scope.address = "Corso Bramante 66, 10126 Torino, Italia";
             $scope.postcode = "10126";
-        } else if ($model.id === "Spain - IMDEA - IMDEA") {
+        } else if ($model.id === "Spain - Madrid - IMDEA") {
             $scope.address = "Avenida del Mar Mediterráneo 22, 28918 Leganes MADRID, Spain";
             $scope.postcode = "28918";
-        } else if ($model.id === "Norway - Celerway - CWY") {
+        } else if ($model.id === "Norway - Oslo - CWY") {
             $scope.address = "Martin Linges VEI 17, 1367 Snaroya, Norway";
             $scope.postcode = "1367";
         } else if ($model.id === "Sweden - Karlstad - KAU") {
@@ -216,29 +263,25 @@ mvisControllers.controller('sideMgmtController', ['$scope', '$state', 'mvisServi
                 postcode: $scope.postcode
             };
 
-        if ($scope.mngmtOperator && $scope.mngmtICCID) {
-            ifdetails.mngmtOperator = $scope.mngmtOperator;
-            ifdetails.mngmtICCID = $scope.mngmtICCID;
-            interfaces.push($scope.mngmtICCID);
+        if ($scope.device0Operator && $scope.device0ICCID) {
+            ifdetails.device0Operator = $scope.device0Operator;
+            ifdetails.device0ICCID = $scope.device0ICCID;
+            interfaces.push($scope.device0ICCID);
         }
-        if ($scope.eth0ID) {
-            ifdetails.eth0ID = $scope.eth0ID;
-            interfaces.push($scope.eth0ID);
+        if ($scope.device1Operator && $scope.device1ICCID) {
+            ifdetails.device1Operator = $scope.device1Operator;
+            ifdetails.device1ICCID = $scope.device1ICCID;
+            interfaces.push($scope.device1ICCID);
         }
-        if ($scope.wifiModem1Operator && $scope.wifiModem1ICCID) {
-            ifdetails.wifiModem1Operator = $scope.wifiModem1Operator;
-            ifdetails.wifiModem1ICCID = $scope.wifiModem1ICCID;
-            interfaces.push($scope.wifiModem1ICCID);
+        if ($scope.device2Operator && $scope.device2ICCID) {
+            ifdetails.device2Operator = $scope.device2Operator;
+            ifdetails.device2ICCID = $scope.device2ICCID;
+            interfaces.push($scope.device2ICCID);
         }
-        if ($scope.wifiModem2Operator && $scope.wifiModem2ICCID) {
-            ifdetails.wifiModem2Operator = $scope.wifiModem2Operator;
-            ifdetails.wifiModem2ICCID = $scope.wifiModem2ICCID;
-            interfaces.push($scope.wifiModem2ICCID);
-        }
-        if ($scope.wifiModem3Operator && $scope.wifiModem3ICCID) {
-            ifdetails.wifiModem3Operator = $scope.wifiModem3Operator;
-            ifdetails.wifiModem3ICCID = $scope.wifiModem3ICCID;
-            interfaces.push($scope.wifiModem3ICCID);
+        if ($scope.device3Operator && $scope.device3ICCID) {
+            ifdetails.device3Operator = $scope.device3Operator;
+            ifdetails.device3ICCID = $scope.device3ICCID;
+            interfaces.push($scope.device3ICCID);
         }
 
         body.ifdetails = ifdetails;
@@ -429,14 +472,15 @@ mvisControllers.controller('stateRegionController', ['$scope', '$state', '$filte
             var gmap = new google.maps.Map(document.getElementById('region_div'), {
                 zoom: 8,
                 center: {lat: data.centre_latitude, lng: data.centre_longitude}
-            });
+            }), bounds = new google.maps.LatLngBounds();
 
             $scope.nodes = [];
             angular.forEach(data.data, function (node) {
                 console.log("Node info: ", node);
                 var nodeid = mvisService.composeNodeName(node.nodeid, node.displayname, node.hostname),
+                    position = new google.maps.LatLng(node.latitude, node.longitude),
                     marker = new google.maps.Marker({
-                        position: new google.maps.LatLng(node.latitude, node.longitude),
+                        position: position,
                         map: gmap,
                         title: nodeid,
                         icon: {
@@ -467,7 +511,12 @@ mvisControllers.controller('stateRegionController', ['$scope', '$state', '$filte
                         timeout: 60000
                     });
                 });
+
+                bounds.extend(position);
             }, $scope.nodes);
+
+            gmap.fitBounds(bounds);
+            gmap.panToBounds(bounds);
 
             $scope.nodesTable = new NgTableParams({
                 count: 5
@@ -726,7 +775,7 @@ mvisControllers.controller('statPeriodicController', ['$scope', '$stateParams', 
     $scope.timers = [];
 
     // this is the (real) management task
-    var rttchart, signalstrengthchart,
+    var rttchart, signalstrengthchart, cpuchart,
         nodeid = mvisService.decomposeNodeId($stateParams.nodeid);
 
     function createTracker(info, inivalues) {
@@ -741,19 +790,28 @@ mvisControllers.controller('statPeriodicController', ['$scope', '$stateParams', 
                 strokeOpacity: 1.0,
                 strokeWeight: 2
             }),
+            position = new google.maps.LatLng(info.current.lat, info.current.lng),
             marker = new google.maps.Marker({
-                position: new google.maps.LatLng(info.current.lat, info.current.lng),
+                position: position,
                 title: "Lat: " + info.current.lat + ", Lng: " + info.current.lng,
                 map: gmap
-            });
+            }),
+            bounds = new google.maps.LatLngBounds();
         polyline.setMap(gmap);
+        bounds.extend(position);
+
+        gmap.fitBounds(bounds);
+        gmap.panToBounds(bounds);
+
         return {gmap: gmap, polyline: polyline, marker: marker};
     }
 
-    function periodicUpdateBuffer(nid, iid, t, mint, points, fn, buffer) {
-        var timestamp = t,
-            mintimestamp = mint,
+    function periodicUpdateBuffer(nid, iid, t, points, fn, buffer) {
+        var timestamp = t, mintimestamp,
             timer = $interval(function () {
+                mintimestamp = timestamp;
+                timestamp = new Date().getTime();
+
                 fn(nid, iid, timestamp, mintimestamp, points)
                     .success(function (data) {
                         console.log("DATA: ", data);
@@ -762,17 +820,34 @@ mvisControllers.controller('statPeriodicController', ['$scope', '$stateParams', 
                     .error(function (error) {
                         $state.go('error', {error: error});
                     });
-
-                mintimestamp = timestamp;
-                timestamp = new Date().getTime();
             }, (points * 1000));
         $scope.timers.push(timer);
     }
 
-    function periodicGPSUpdateBuffer(c, s, nid, t, mint, points, fn, buffer) {
-        var timestamp = t,
-            mintimestamp = mint,
+    function periodicCPUupdateBuffer(nid, t, points, fn, buffer) {
+        var timestamp = t, mintimestamp,
             timer = $interval(function () {
+                mintimestamp = timestamp;
+                timestamp = new Date().getTime();
+
+                fn(nid, timestamp, mintimestamp, points)
+                    .success(function (data) {
+                        console.log("DATA: ", data);
+                        buffer.push.apply(buffer, data);
+                    })
+                    .error(function (error) {
+                        $state.go('error', {error: error});
+                    });
+            }, (points * 1000));
+        $scope.timers.push(timer);
+    }
+
+    function periodicGPSUpdateBuffer(c, s, nid, t, points, fn, buffer) {
+        var timestamp = t, mintimestamp,
+            timer = $interval(function () {
+                mintimestamp = timestamp;
+                timestamp = new Date().getTime();
+
                 fn(c, s, nid, timestamp, mintimestamp, points)
                     .success(function (info) {
                         console.log("DATA: ", info.data);
@@ -781,9 +856,6 @@ mvisControllers.controller('statPeriodicController', ['$scope', '$stateParams', 
                     .error(function (error) {
                         $state.go('error', {error: error});
                     });
-
-                mintimestamp = timestamp;
-                timestamp = new Date().getTime();
             }, (points * 1000));
         $scope.timers.push(timer);
     }
@@ -822,14 +894,14 @@ mvisControllers.controller('statPeriodicController', ['$scope', '$stateParams', 
 
         mvisService.getRTT(nodeid, ifaceid, timestamp, mintimestamp, 118)
             .success(function (data) {
-                console.log("RTT: ", data);
+                console.log("RTT(", data.length, "): ", data);
                 slicedata = data.slice(0, parseInt(data.length / 2, 10));
                 series.setData(slicedata, true, true);
 
                 slicedata = data.slice(parseInt(data.length / 2, 10), data.length);
                 buffer.push.apply(buffer, slicedata);
 
-                periodicUpdateBuffer(nodeid, ifaceid, timestamp, mintimestamp, 59, mvisService.getRTT, buffer);
+                periodicUpdateBuffer(nodeid, ifaceid, timestamp, 59, mvisService.getRTT, buffer);
                 periodicDrawBuffer(series, 1, buffer, "RTT");
             })
             .error(function (error) {
@@ -839,20 +911,20 @@ mvisControllers.controller('statPeriodicController', ['$scope', '$stateParams', 
 
     function signalstrengthPeriodicLoadData(nodeid, ifaceid, series, buffer) {
         console.log("signalstrengthPeriodicLoadData series", ifaceid);
-        var i, len, timer, slicedata,
+        var slicedata,
             timestamp = new Date().getTime(),
             mintimestamp = mvisService.getMinTimestamp(timestamp, "1 hour before");
 
         mvisService.getSignalStrength(nodeid, ifaceid, timestamp, mintimestamp, 118)
             .success(function (data) {
-                console.log("SIGNALSTRENGTH: ", data);
+                console.log("SIGNALSTRENGTH(", data.length, "): ", data);
                 slicedata = data.slice(0, parseInt(data.length / 2, 10));
-                series.setData(data, true, true);
+                series.setData(slicedata, true, true);
 
                 slicedata = data.slice(parseInt(data.length / 2, 10), data.length);
                 buffer.push.apply(buffer, slicedata);
 
-                periodicUpdateBuffer(nodeid, ifaceid, timestamp, mintimestamp, 59, mvisService.getSignalStrength, buffer);
+                periodicUpdateBuffer(nodeid, ifaceid, timestamp, 59, mvisService.getSignalStrength, buffer);
                 periodicDrawBuffer(series, 1, buffer, "SignalStrength");
             })
             .error(function (error) {
@@ -860,8 +932,31 @@ mvisControllers.controller('statPeriodicController', ['$scope', '$stateParams', 
             });
     }
 
+    function cpuPeriodicLoadData(nodeid, name, series, buffer) {
+        console.log("cpuPeriodicLoadData series", name);
+        var slicedata,
+            timestamp = new Date().getTime(),
+            mintimestamp = mvisService.getMinTimestamp(timestamp, "1 hour before");
+
+        mvisService.getCPU(nodeid, timestamp, mintimestamp, 118)
+            .success(function (data) {
+                console.log("CPU(", data.length, "): ", data);
+                slicedata = data.slice(0, parseInt(data.length / 2, 10));
+                series.setData(slicedata, true, true);
+
+                slicedata = data.slice(parseInt(data.length / 2, 10), data.length);
+                buffer.push.apply(buffer, slicedata);
+
+                periodicCPUupdateBuffer(nodeid, timestamp, 59, mvisService.getCPU, buffer);
+                periodicDrawBuffer(series, 1, buffer, "CPU");
+            })
+            .error(function (error) {
+                $state.go('error', {error: error});
+            });
+    }
+
     function gpsPeriodicLoadData(country, site, nodeid) {
-        var tracker, timer, i, len, slicedata,
+        var tracker, slicedata,
             timestamp = new Date().getTime(),
             mintimestamp = mvisService.getMinTimestamp(timestamp, "1 hour before"),
             gpsBuffer = [];
@@ -875,7 +970,7 @@ mvisControllers.controller('statPeriodicController', ['$scope', '$stateParams', 
                 slicedata = info.data.slice(parseInt(info.data.length / 2, 10), info.data.length);
                 gpsBuffer.push.apply(gpsBuffer, slicedata);
 
-                periodicGPSUpdateBuffer(country, site, nodeid, timestamp, mintimestamp, 59, mvisService.getGps, gpsBuffer);
+                periodicGPSUpdateBuffer(country, site, nodeid, timestamp, 59, mvisService.getGps, gpsBuffer);
                 periodicGPSDrawBuffer(tracker, 1, gpsBuffer, "GPS");
             })
             .error(function (error) {
@@ -921,6 +1016,19 @@ mvisControllers.controller('statPeriodicController', ['$scope', '$stateParams', 
         });
     }
 
+    function getPeriodicAllCpu(nodeid) {
+        console.log("getPeriodicAllCpu nodeid", nodeid);
+        cpuchart = mvisService.createCPUStockChart(function () {
+            var ret = [{
+                name: "cpu",
+                data: []
+            }];
+            return ret;
+        }, function (series, buffer) {
+            cpuPeriodicLoadData(nodeid, series.name, series, buffer);
+        });
+    }
+
     // this is the (real) management task
     mvisService.getInterfaces($stateParams.country, $stateParams.site, nodeid)
         .success(function (ifaces) {
@@ -928,6 +1036,7 @@ mvisControllers.controller('statPeriodicController', ['$scope', '$stateParams', 
 
             getPeriodicAllRTT(nodeid, ifaces);
             getPeriodicAllSignalStrength(nodeid, ifaces);
+            getPeriodicAllCpu(nodeid);
         })
         .error(function (error) {
             $state.go('error', {error: error});

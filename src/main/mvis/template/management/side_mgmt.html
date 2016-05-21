@@ -38,55 +38,51 @@
                 <input type="text" class="form-control" id="nodename" ng-model="nodename" placeholder="Test-node-1">
             </div>
             <div class="form-group">
-                <label for="management">Management</label>
+                <label for="device0">Device0</label>
                 <div class="inline-row">
-                    <ui-select ng-model="mngmtOperators.selected" theme="select2" ng-disabled="disabled" on-select="mngmtOperatorsSelected($model)">
+                    <ui-select ng-model="device0Operators.selected" theme="select2" ng-disabled="disabled" on-select="device0OperatorsSelected($model)">
                     <ui-select-match placeholder="Select an operators">{{$select.selected.id}}</ui-select-match>
-                        <ui-select-choices repeat="o in mngmtOperators | filter: {id: $select.search}">
+                        <ui-select-choices repeat="o in device0Operators | filter: {id: $select.search}">
                             <div ng-bind-html="o.id | highlight: $select.search"></div>
                         </ui-select-choices>
                     </ui-select>
-                    <input type="text" id="mngmtICCID" ng-model="mngmtICCID" placeholder="Management iccid">
+                    <input type="text" id="device0ICCID" ng-model="device0ICCID" placeholder="Device0 iccid">
                 </div>
             </div>
             <div class="form-group">
-                <label for="eth0">Eth0</label>
-                <input type="text" class="form-control" id="eth0ID" ng-model="eth0ID" placeholder="Eth0 identifier">
-            </div>
-            <div class="form-group">
-                <label for="wifimodem1">Wifi Modem (1)</label>
+                <label for="device1">Device1</label>
                 <div class="inline-row">
-                    <ui-select ng-model="mifi1Operators.selected" theme="select2" ng-disabled="disabled" on-select="mifi1OperatorsSelected($model)">
+                    <ui-select ng-model="device1Operators.selected" theme="select2" ng-disabled="disabled" on-select="device1OperatorsSelected($model)">
                     <ui-select-match placeholder="Select an operators">{{$select.selected.id}}</ui-select-match>
-                        <ui-select-choices repeat="o in mifi1Operators | filter: {id: $select.search}">
+                        <ui-select-choices repeat="o in device1Operators | filter: {id: $select.search}">
                             <div ng-bind-html="o.id | highlight: $select.search"></div>
                         </ui-select-choices>
                     </ui-select>
-                    <input type="text" id="wifiModem1ICCID" ng-model="wifiModem1ICCID" placeholder="Mifi-1 iccid">
+                    <input type="text" id="device1ICCID" ng-model="device1ICCID" placeholder="Device1 iccid">
                 </div>
             </div>
             <div class="form-group">
-                <label for="wifimodem2">Wifi Modem (2)</label>
+                <label for="device2">Device2</label>
                 <div class="inline-row">
-                    <ui-select ng-model="mifi2Operators.selected" theme="select2" ng-disabled="disabled" on-select="mifi2OperatorsSelected($model)">
+                    <ui-select ng-model="device2Operators.selected" theme="select2" ng-disabled="disabled" on-select="device2OperatorsSelected($model)">
                     <ui-select-match placeholder="Select an operators">{{$select.selected.id}}</ui-select-match>
-                        <ui-select-choices repeat="o in mifi2Operators | filter: {id: $select.search}">
+                        <ui-select-choices repeat="o in device2Operators | filter: {id: $select.search}">
                             <div ng-bind-html="o.id | highlight: $select.search"></div>
                         </ui-select-choices>
                     </ui-select>
-                    <input type="text" id="wifiModem2ICCID" ng-model="wifiModem2ICCID" placeholder="Mifi-2 iccid">
+                    <input type="text" id="device2ICCID" ng-model="device2ICCID" placeholder="Device2 iccid">
                 </div>
             </div>
             <div class="form-group">
-                <label for="wifimodem3">Wifi Modem (3)</label>
+                <label for="device3">Device3</label>
                 <div class="inline-row">
-                    <ui-select ng-model="mifi3Operators.selected" theme="select2" ng-disabled="disabled" on-select="mifi3OperatorsSelected($model)">
+                    <ui-select ng-model="device3Operators.selected" theme="select2" ng-disabled="disabled" on-select="device3OperatorsSelected($model)">
                     <ui-select-match placeholder="Select an operators">{{$select.selected.id}}</ui-select-match>
-                        <ui-select-choices repeat="o in mifi3Operators | filter: {id: $select.search}">
+                        <ui-select-choices repeat="o in device3Operators | filter: {id: $select.search}">
                             <div ng-bind-html="o.id | highlight: $select.search"></div>
                         </ui-select-choices>
                     </ui-select>
-                    <input type="text" id="wifiModem3ICCID" ng-model="wifiModem3ICCID" placeholder="Mifi-3 iccid">
+                    <input type="text" id="device3ICCID" ng-model="device3ICCID" placeholder="Device3 iccid">
                 </div>
             </div>
             <div class="form-group">
