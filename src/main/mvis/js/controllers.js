@@ -766,6 +766,77 @@ mvisControllers.controller('statPingController', ['$scope', '$stateParams', '$st
     }
 }]);
 
+mvisControllers.controller('statHttpDownloadController', ['$scope', '$stateParams', '$state', '$interval', 'mvisService', function ($scope, $stateParams, $state, $interval, mvisService) {
+    console.log("statHttpDownloadController testbedid=" + $stateParams.testbedid  + ", nodeid=" + $stateParams.nodeid + ", ifaceid=" + $stateParams.ifaceid +
+                ", resolution=" + $stateParams.resolution + ", timestamp=" + $stateParams.timestamp + ", mintimestamp=" + $stateParams.mintimestamp);
+
+    $scope.uid = $stateParams.nodeid;
+    var httpdownloadchart,
+        tbed = $stateParams.testbedid.replace(" - ", "-").split("-"),
+        nodeid = mvisService.decomposeNodeId($stateParams.nodeid);
+
+    function httpDownloadLoadData(nodeid, ifaceid, timestamp, mintimestamp, resolution, series) {
+        console.log("httpDownloadLoadData series", ifaceid);
+        mvisService.getHttpSpeed(nodeid, ifaceid, timestamp, mintimestamp, resolution)
+            .success(function (data) {
+                console.log("HttpSpeed: ", data);
+                series.setData(data, true, true);
+            })
+            .error(function (error) {
+                $state.go('error', {error: error});
+            });
+    }
+
+    function getHTTPDownload(nodeid, ifaceid, timestamp, mintimestamp, resolution) {
+        console.log("getHTTPDownload nodeid", nodeid, ", ifaceid", ifaceid, ", timestamp", timestamp,
+                    ", mintimestamp", mintimestamp, ", resolution", resolution);
+        httpdownloadchart = mvisService.createHTTPDownloadChart(function () {
+            return [{
+                type: "scatter",
+                name: ifaceid,
+                data: []
+            }];
+        }, function (series) {
+            httpDownloadLoadData(nodeid, series.name, timestamp, mintimestamp, resolution, series);
+        });
+    }
+
+    function getAllHTTPDownload(nodeid, ifaces, timestamp, mintimestamp, resolution) {
+        console.log("getAllHTTPDownload nodeid", nodeid, ", ifaces", ifaces, ", timestamp", timestamp,
+                    ", mintimestamp", mintimestamp, ", resolution", resolution);
+        httpdownloadchart = mvisService.createHTTPDownloadChart(function () {
+            var i, ret = [];
+            angular.forEach(ifaces, function (ifs) {
+                for (i = 0; i < ifs.interfaces.length; i += 1) {
+                    ret.push({
+                        type: "scatter",
+                        name: ifs.interfaces[i],
+                        data: []
+                    });
+                }
+            });
+            return ret;
+        }, function (series) {
+            httpDownloadLoadData(nodeid, series.name, timestamp, mintimestamp, resolution, series);
+        });
+    }
+
+    // this is the (real) management task
+    if ($stateParams.ifaceid === "ALL") {
+        mvisService.getInterfaces(tbed[0], tbed[1], nodeid)
+            .success(function (ifaces) {
+                console.log("Interfaces", ifaces);
+
+                getAllHTTPDownload(nodeid, ifaces, $stateParams.timestamp, $stateParams.mintimestamp, $stateParams.resolution);
+            })
+            .error(function (error) {
+                $state.go('error', {error: error});
+            });
+
+    } else {
+        getHTTPDownload(nodeid, $stateParams.ifaceid, $stateParams.timestamp, $stateParams.mintimestamp, $stateParams.resolution);
+    }
+}]);
 
 mvisControllers.controller('statPeriodicController', ['$scope', '$stateParams', '$state', '$interval', 'mvisService', function ($scope, $stateParams, $state, $interval, mvisService) {
     console.log("statPeriodicController country=" + $stateParams.country  + ", site=" + $stateParams.site + ", nodeid=" + $stateParams.nodeid +
@@ -1072,8 +1143,8 @@ mvisControllers.controller('statPeriodicController', ['$scope', '$stateParams', 
 
             getPeriodicAllRTT(nodeid, ifaces);
             getPeriodicAllSignalStrength(nodeid, ifaces);
-            getPeriodicAllHttpSpeed(nodeid, ifaces);
-            getPeriodicAllCpu(nodeid);
+            //getPeriodicAllHttpSpeed(nodeid, ifaces);
+            //getPeriodicAllCpu(nodeid);
         })
         .error(function (error) {
             $state.go('error', {error: error});

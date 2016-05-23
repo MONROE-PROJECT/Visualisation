@@ -325,6 +325,61 @@ mvisServices.service('mvisService', ['$http', function ($http) {
         });
     };
 
+    this.createHTTPDownloadChart = function (initcallback, loadcallback) {
+        return new Highcharts.Chart({
+            chart: {
+                renderTo: 'httpdownload-chart',
+                zoomType: 'x',
+                events: {
+                    load: function () {
+                        var i, series = [];
+                        for (i = 0; i < this.series.length; i += 1) {
+                            series.push(this.series[i]);
+                        }
+                        for (i = 0; i < series.length; i += 1) {
+                            loadcallback(series[i]);
+                        }
+                    }
+                }
+            },
+            title: {text: ''},
+            xAxis: {
+                type: 'datetime',
+                labels: {
+                    overflow: 'justify',
+                    format: '{value:%Y/%m/%d %H:%M:%S}',
+                    align: 'right',
+                    rotation: -30
+                }
+            },
+            yAxis: {title: {text: 'Speed (b/s)'}},
+            legend: {enabled: true},
+            plotOptions: {
+                scatter: {
+                    marker: {
+                        radius: 5,
+                        states: {
+                            hover: {
+                                enabled: true,
+                                lineColor: 'rgb(100,100,100)'
+                            }
+                        }
+                    },
+                    states: {
+                        hover: {
+                            marker: {enabled: true}
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<b>{series.name}</b><br>',
+                        pointFormat: '{point.x} , {point.y} (b/s)'
+                    }
+                }
+            },
+            series: initcallback()
+        });
+    };
+
     this.createHttpSpeedStockChart = function (initcallback, loadcallback) {
         return new Highcharts.StockChart({
             chart: {

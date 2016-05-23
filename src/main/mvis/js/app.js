@@ -138,6 +138,15 @@ mvisApp.config(function ($stateProvider, $urlRouterProvider) {
                 }
             }
         })
+        .state('statistic.http-download', {
+            url: '/httpdownload?testbedid&nodeid&ifaceid&timestamp&mintimestamp&resolution',
+            views: {
+                'main@': {
+                    templateUrl: 'template/monitoring/httpdownload.html',
+                    controller: 'statHttpDownloadController'
+                }
+            }
+        })
         .state('statistic.periodic', {
             url: '/periodic?country&site&nodeid&timeout',
             views: {

@@ -139,7 +139,8 @@ app.get('/query_info', function (req, res) {
             {id: "se - sweden"}
         ],
         experiments: [
-            {id: "ping"}
+            {id: "ping"},
+            {id: "http-download"}
         ],
         resolutions: [
             {id: "100"},
@@ -550,7 +551,7 @@ app.get('/httpspeed/:nodeid/:ifaceid/:timestamp/:mintimestamp/:resolution', func
     // prepared query to the CASSANDRA-DB (the timestamps are stored in secs!)
     var threshold = Math.floor(req.params.timestamp / 1000),
         minthreshold = Math.floor(req.params.mintimestamp / 1000),
-        table = 'monroe_exp_http',
+        table = 'monroe_exp_http_download',
         query = 'SELECT timestamp, speed FROM ' + table + ' WHERE nodeid = ? AND iccid = ? AND timestamp <= ? AND timestamp >= ? ORDER BY timestamp DESC LIMIT ?';
 
     cassclient.execute(query, [req.params.nodeid, req.params.ifaceid, threshold, minthreshold, req.params.resolution],
