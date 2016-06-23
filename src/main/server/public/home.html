@@ -51,6 +51,16 @@
                                         <li><a href="#/testbed/state/se/sweden">Sweden</a></li>
                                     </ul>
                                 </li>
+                                <li class="dropdown">
+                                    <a class="dropdown-toggle" data-toggle="dropdown">Scheduler
+                                    <span class="caret"></span></a>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="#/scheduler/status">Status</a></li>
+                                        <li><a href="#/scheduler/new">New</a></li>
+                                        <li><a href="#/scheduler/resources">Resources</a></li>
+                                        <li><a href="#/scheduler/help">Help</a></li>
+                                    </ul>
+                                </li>
                             </ul>
                             <ul class="nav navbar-nav navbar-right">
                                 <li><a href="#/management"><span class="glyphicon glyphicon-wrench"></span> Admin</a></li>
@@ -58,17 +68,7 @@
                         </div>
                     </div>
                </nav>
-                <div class="container-fluid">
-                    <div class="row row-offcanvas row-offcanvas-left">
-                        <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar" role="navigation">
-                            <div ui-view="sidemenu"></div>
-                            <div ui-view="operations"></div>
-                        </div>
-                        <div class="col-xs-12 col-sm-9">
-                            <div ui-view="main"><i>select function...</i></div>
-                        </div>
-                    </div>
-                </div>
+               <div ui-view="layout"></div>
             </div>
             <div id="footer-logos">
                 <img src="img/celerway_250px_0.png" alt="celerway-logo" height="80%" align="middle">
@@ -78,11 +78,11 @@
                 <!--img src="img/net1.jpg" alt="net1-logo" height="80%" align="middle"-->
                 <img src="img/nextworks.jpg" alt="nextworks-logo" height="80%" align="middle">
                 <img src="img/simula_emodocon_s.jpg" alt="simula-logo" height="80%" align="middle">
-                <!--img src="img/Telenor_logo.png" alt="telenor-logo" height="80%" align="middle"-->
+                <img src="img/Telenor_logo.png" alt="telenor-logo" height="80%" align="middle">
             </div>
             <div id="footer-notes">
                 <p>MONROE (Measuring Mobile Broadband Networks in Europe) funded by the Commission of the European Union into the H2020 program</p>
-                <p>Roberto Monno at Nextworks [<a href="http://www.nextworks.it/">NXW</a>]</p>
+                <p>Roberto Monno at Nextworks [<a href="http://www.nextworks.it/">NXW</a>] and Miguel Peon at IMDEA [<a href="http://www.imdea.org/">IMDEA</a>]</p>
             </div>
         </div>
         <script src="js/app.min.js"></script>

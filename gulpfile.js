@@ -209,8 +209,8 @@ gulp.task('html', function () {
 ======================================================================*/
 gulp.task('less', function () {
     return pipeForEachApp(function (app) {
-
-        return gulp.src(['./src/main/' + app + '/less/app.less'])
+        var prefix = './src/main/' + app + '/less/';
+        return gulp.src([prefix + 'app.less', prefix + 'signin.css'])
             .pipe(less({
                 paths: [
                     path.resolve(__dirname, 'src/main/' + app + '/less'),

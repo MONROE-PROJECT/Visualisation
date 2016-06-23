@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" ng-app="mvisApp">
+
+<head>
+    <title>Monroe Experimenters Portal</title>
+    <!-- Monroe Style -->
+    <style>
+        #monroeSty {
+            padding-top:    25px;
+            padding-botton: 25px;
+            padding-right:  50px;
+            padding-left:   50px;
+        }
+    </style>
+</head>
+
+<body ng-controller="schedulerStatusExperimentCtrl" id="monroeSty">
+    <!-- Status Tab -->
+
+    <div class="panel panel-default">
+
+    <div class="panel-heading">
+    <h3>Experiments for user {{userName}} (ID = {{userID}})</h3>
+    </div>
+
+    <div class="panel-body">
+
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Start</th>
+                <th>Stop</th>
+                <th>Completed</th>
+				<th></th>
+            </tr>
+        </thead>
+
+        <tbody ng-repeat="item in data.experiments | orderBy:'-id'" ng-click="viewExperiment();" ng-hide="hideCompleted && item.completed">
+            <tr>
+                <td>{{item.id}}</td>
+                <td>{{item.name}}</td>
+                <td>{{TimestampToString(item.start)}}</td>
+                <td>{{TimestampToString(item.stop)}}</td>
+                <td>{{item.completed ? "Yes" : "No"}}</td>
+				<td ng-if="item.completed"><span class="glyphicon glyphicon-trash" style="color:crimson"></span> <button type="submit" class="btn btn-default btn-xs" ng-click="DeleteExperiment(item, $event)">Delete</button></td>
+				<td ng-if="!item.completed"><span class="glyphicon glyphicon-trash" style="color:crimson"></span> <button type="submit" class="btn btn-default btn-xs" ng-click="DeleteExperiment(item, $event)">Cancel & Delete</button></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="checkbox-inline">
+        <label><input type="checkbox" ng-model="hideCompleted">Hide Completed</label>
+    </div>
+
+    <div class="text-center">
+        <ul class="pagination pagination-lg">
+            <li class="disabled"><span>&laquo;</span></li>
+            <li class="active"><a href="#">1</a></li>
+            <li><a href="#">2</a></li>
+            <li><a href="#">3</a></li>
+            <li><a href="#">4</a></li>
+            <li><a href="#">5</a></li>
+            <li><a href="#">&raquo;</a></li>
+        </ul>
+    </div>
+
+    </div>
+    </div> <!-- Panel -->
+
+    <!-- Experiment details -->
+
+    <div class="panel panel-default">
+
+    <div class="panel-heading">
+    <h3>Details for experiment "{{selectedExperiment.experiment.name}}"</h3>
+    </div>
+
+    <div class="panel-body">
+        <ul class="list-group">
+            <li class="list-group-item"><strong>Node types:</strong> {{selectedExperiment.experiment.type}}</li>
+            <li class="list-group-item"><strong>Number of executions: {{selectedExperiment.executions.total}}</strong>
+
+                <table class="table table-condensed">
+                    <thead>
+                    </thead>
+                    <tbody>
+					<tr>
+                        <td class="col-md-1">Finished: </td>
+                        <td class="col-md-1"><span class="label label-success label-as-badge">{{selectedExperiment.executions.finished}}</span></td>
+                        <td class="col-md-10"></td>
+                        </tr>
+                        <tr>
+                        <td class="col-md-1">Stopped: </td>
+                        <td class="col-md-1"><span class="label label-success label-as-badge">{{selectedExperiment.executions.stopped}}</span></td>
+                        <td class="col-md-10"></td>
+                        </tr>
+                        <tr>
+                        <td class="col-md-1">Failed: </td>
+                        <td class="col-md-1"><span class="label label-danger label-as-badge">{{selectedExperiment.executions.failed}}</span></td>
+                        <td class="col-md-10"></td>
+                        </tr>
+                        <tr>
+                        <td class="col-md-1">Canceled: </td>
+                        <td class="col-md-1"><span class="label label-warning label-as-badge">{{selectedExperiment.executions.canceled}}</span></td>
+                        <td class="col-md-10"></td>
+                        </tr>
+                        <tr>
+                        <td class="col-md-1">Aborted: </td>
+                        <td class="col-md-1"><span class="label label-warning label-as-badge">{{selectedExperiment.executions.aborted}}</span></td>
+                        <td class="col-md-10"></td>
+                        </tr>
+                        <tr>
+                        <td class="col-md-1">Remaining: </td>
+                        <td class="col-md-1"><span class="label label-default label-as-badge">{{selectedExperiment.executions.remaining}}</span></td>
+                        <td class="col-md-10"></td>
+						</tr>
+						<tr>
+						<td class="col-md-1"></td>
+						<td class="col-md-2">Defined: {{selectedExperiment.executions.defined}}</td>
+                        <td class="col-md-9"></td>
+						</tr>
+						<tr>
+						<td class="col-md-1"></td>
+						<td class="col-md-2">Deployed: {{selectedExperiment.executions.deployed}}</td>
+                        <td class="col-md-9"></td>
+                        </tr>
+						<tr>
+						<td class="col-md-1"></td>
+						<td class="col-md-2">Started: {{selectedExperiment.executions.started}}</td>
+                        <td class="col-md-9"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </li>
+        </ul>
+
+        <ul class="list-group">
+            <li class="list-group-item"><strong>Individual schedules:</strong> {{selectedExperiment.executions.total}}</li>
+                <table class="table table-condensed">
+                    <thead>
+						<tr><th>Schedule ID</th><th>Node ID</th><th>Status</th><th>Start</th><th>Stop</th><th>Shared</th><th>Storage</th><th>Traffic quota</th><th>Results</th></tr>
+                    </thead>
+					<tbody ng-repeat="item in selectedExperiment.schedules | orderBy:'id'" >
+						<tr>
+							<td>{{item.id}}</td>
+							<td>{{item.nodeid}}</td>
+							<td>{{Capitalize(item.status)}}</td>
+							<td>{{TimestampToString(item.start)}}</td>
+							<td>{{TimestampToString(item.stop)}}</td>
+							<td>{{item.shared}}</td>
+							<td>{{item.deployment_options.storage}}</td>
+							<td>{{item.deployment_options.traffic}}</td>
+							<td ng-if="(item.status != 'defined') && (item.status != 'deployed')"><a href="{{CreateResultsURL(item.id)}}">download</a></td>
+						</tr>
+                    </tbody>
+                </table>
+        </ul>
+
+	</div>
+
+</body>

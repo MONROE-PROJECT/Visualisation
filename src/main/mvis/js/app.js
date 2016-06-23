@@ -23,7 +23,7 @@
 
 
 var mvisApp = angular.module('mvisApp', ['ngSanitize', 'ngTable', 'ui.router', 'ui.bootstrap', 'ui.select',
-                                         'timepickerPop', 'mvisControllers', 'mvisServices']);
+                                         'timepickerPop', 'mvisControllers', 'mvisSchedulerControllers', 'mvisServices']);
 
 mvisApp.config(function ($stateProvider, $urlRouterProvider) {
     // global HighChart option here!
@@ -31,10 +31,17 @@ mvisApp.config(function ($stateProvider, $urlRouterProvider) {
 
     $urlRouterProvider.otherwise('/notfound');
     $stateProvider
+        .state('root', {
+            abstract: true,
+            views: {
+                'layout': { templateUrl: 'template/index.html' }
+            }
+        })
         .state('start', {
             url: '',
+            parent: 'root',
             views: {
-                main: {
+                'main': {
                     templateUrl: 'template/start.html',
                     controller: 'StartController'
                 }
@@ -42,8 +49,9 @@ mvisApp.config(function ($stateProvider, $urlRouterProvider) {
         })
         .state('login', {
             url: '/login',
+            parent: 'root',
             views: {
-                main: {
+                'main': {
                     templateUrl: 'template/login.html',
                     controller: 'LoginController'
                 }
@@ -51,8 +59,9 @@ mvisApp.config(function ($stateProvider, $urlRouterProvider) {
         })
         .state('logout', {
             url: '/logout',
+            parent: 'root',
             views: {
-                main: {
+                'main': {
                     templateUrl: 'template/logout.html',
                     controller: 'LogoutController'
                 }
@@ -60,17 +69,19 @@ mvisApp.config(function ($stateProvider, $urlRouterProvider) {
         })
         .state('notfound', {
             url: '/notfound',
+            parent: 'root',
             views: {
-                main: {
+                'main': {
                     templateUrl: 'template/notfound.html'
                 }
             }
         })
         .state('error', {
             url: '/error',
+            parent: 'root',
             params: {error: null},
             views: {
-                main: {
+                'main': {
                     templateUrl: 'template/error.html',
                     controller: function ($scope, $stateParams) {
                         $scope.error = $stateParams.error;
@@ -80,6 +91,7 @@ mvisApp.config(function ($stateProvider, $urlRouterProvider) {
         })
         .state('management', {
             url: '/management',
+            parent: 'root',
             views: {
                 'main': {
                     templateUrl: 'template/management/main_mgmt.html',
@@ -95,7 +107,10 @@ mvisApp.config(function ($stateProvider, $urlRouterProvider) {
             url: '/testbed',
             abstract: true,
             views: {
-                'sidemenu': {
+                'layout': {
+                    templateUrl: 'template/index.html'
+                },
+                'sidemenu@testbed': {
                     templateUrl: 'template/query.html',
                     controller: 'queryController'
                 }
@@ -104,7 +119,7 @@ mvisApp.config(function ($stateProvider, $urlRouterProvider) {
         .state('testbed.map', {
             url: '/map',
             views: {
-                'main@': {
+                'main': {
                     templateUrl: 'template/map/earth.html',
                     controller: 'testbedController'
                 }
@@ -113,7 +128,7 @@ mvisApp.config(function ($stateProvider, $urlRouterProvider) {
         .state('testbed.state', {
             url: '/state/{country}/{site}',
             views: {
-                'main@': {
+                'main': {
                     templateUrl: 'template/map/state-region.html',
                     controller: 'stateRegionController'
                 }
@@ -123,7 +138,10 @@ mvisApp.config(function ($stateProvider, $urlRouterProvider) {
             url: '/statistic',
             abstract: true,
             views: {
-                'sidemenu': {
+                'layout': {
+                    templateUrl: 'template/index.html'
+                },
+                'sidemenu@statistic': {
                     templateUrl: 'template/query.html',
                     controller: 'queryController'
                 }
@@ -132,7 +150,7 @@ mvisApp.config(function ($stateProvider, $urlRouterProvider) {
         .state('statistic.ping', {
             url: '/ping?testbedid&nodeid&ifaceid&timestamp&mintimestamp&resolution',
             views: {
-                'main@': {
+                'main': {
                     templateUrl: 'template/monitoring/networking.html',
                     controller: 'statPingController'
                 }
@@ -141,7 +159,7 @@ mvisApp.config(function ($stateProvider, $urlRouterProvider) {
         .state('statistic.http-download', {
             url: '/httpdownload?testbedid&nodeid&ifaceid&timestamp&mintimestamp&resolution',
             views: {
-                'main@': {
+                'main': {
                     templateUrl: 'template/monitoring/httpdownload.html',
                     controller: 'statHttpDownloadController'
                 }
@@ -150,9 +168,36 @@ mvisApp.config(function ($stateProvider, $urlRouterProvider) {
         .state('statistic.periodic', {
             url: '/periodic?country&site&nodeid&timeout',
             views: {
-                'main@': {
+                'main': {
                     templateUrl: 'template/monitoring/periodic.html',
                     controller: 'statPeriodicController'
+                }
+            }
+        })
+        .state('scheduler', {
+            url: '/scheduler',
+            abstract: true,
+            views: {
+                'layout': {
+                    templateUrl: 'template/scheduler/index.html',
+                    controller: 'schedulerIndexCtrl'
+                }
+            }
+        })
+        .state('scheduler.status', {
+            url: '/status',
+            views: {
+                'main': {
+                    templateUrl: 'template/scheduler/StatusExperiment.html',
+                    controller: 'schedulerStatusExperimentCtrl'
+                }
+            }
+        })
+        .state('scheduler.errorserver', {
+            url: '/scheduler_errorserver',
+            views: {
+                'main': {
+                    templateUrl: 'template/scheduler/ErrorServer.html'
                 }
             }
         });

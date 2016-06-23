@@ -1,0 +1,23 @@
+<!-- This page:
+    * Accesses the scheduler server to verify the client certificate.
+    * If the client certificate is not present, it shows instructions on
+    acquiring and installing one.
+    * If the client certificate is for an administrator user, it prompts the
+    user to select the correct one (admins cannot use this WEB interface).
+    * If a valid client certificate for a Monroe user is installed, then it redirects
+    the browser to the user's experiments page.
+ -->
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" ng-app="mvisApp">
+<head>
+    <title>Monroe Experimenters Portal</title>
+    <!-- Custom styles for this (scheduler) template -->
+    <link href="css/signin.min.css" rel="stylesheet">
+</head>
+
+<body ng-controller="schedulerIndexController">
+    <div class="container">
+        <div ui-view="main"><h1>Verifying user credentials...</h1></div>
+    </div>
+</body>
