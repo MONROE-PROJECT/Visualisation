@@ -174,6 +174,18 @@ mvisApp.config(function ($stateProvider, $urlRouterProvider) {
                 }
             }
         })
+        .state('compare', {
+            url: '/compare',
+            views: {
+                'layout': {
+                    templateUrl: 'template/scheduler/index.html'
+                },
+                'main@compare': {
+                    templateUrl: 'template/compare/main_compare.html',
+                    controller: 'mainCompareController'
+                }
+            }
+        })
         .state('scheduler', {
             url: '/scheduler',
             abstract: true,

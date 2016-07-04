@@ -51,7 +51,10 @@ mvisServices.service('mvisService', ['$http', function ($http) {
 
     this.getMinTimestamp = function (timestamp, timeslot) {
         var x = timestamp - (60 * 60 * 1000); // 1 hour before
-        if (timeslot === "24 hours before") {
+        if (timeslot === "48 hours before") {
+            x = timestamp - (48 * 60 * 60 * 1000);
+
+        } else if (timeslot === "24 hours before") {
             x = timestamp - (24 * 60 * 60 * 1000);
 
         } else if (timeslot === "6 hours before") {
