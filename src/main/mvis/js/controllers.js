@@ -437,11 +437,15 @@ mvisControllers.controller('testbedController', ['$state', 'mvisService', functi
     var earth_opts = {zoom: 3.0,
                       center: [51.5073509, -0.12775829999998223], // London coordinates
                       atmosphere: true,
+                      dragging: true,
+                      tilting: true,
+                      zooming: true,
                       sky: true},
         earth = WE.map('earth_div', earth_opts),
-        tile_opts = {subdomains: "1234"},
-        tile = WE.tileLayer('http://otile{s}.mqcdn.com/tiles/1.0.0/sat/{z}/{x}/{y}.jpg', tile_opts);
-    tile.addTo(earth);
+        natural_opts = {tileSize: 256, tms: true},
+        natural = WE.tileLayer('http://data.webglearth.com/natural-earth-color/{z}/{x}/{y}.jpg', natural_opts).addTo(earth),
+        toner_opts = {opacity: 0.6},
+        toner = WE.tileLayer('http://tile.stamen.com/toner/{z}/{x}/{y}.png', toner_opts).addTo(earth);
 
     mvisService.getStatesLocation()
         .success(function (data) {
