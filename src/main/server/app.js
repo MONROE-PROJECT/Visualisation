@@ -360,11 +360,24 @@ app.post('/resynchronise_db', function (req, res) {
 
             sched_res.on('end', function () {
                 info = JSON.parse(data);
+                var country = null;
                 for (i = 0; i < info.length; i += 1) {
                     interfaces = [];
                     ifdetails = {};
 
-                    if (info[i].country && info[i].site && info[i].id && info[i].interfaces && (info[i].interfaces.length > 0)) {
+                    country = info[i].country;
+                    if (!country) {
+                        if ((info[i].project === 'celerway') || (info[i].project === 'norway')) {
+                            country = 'no';
+                        } else if (info[i].project === 'sweden') {
+                            country = 'se';
+                        } else if ((info[i].project === 'torino') || (info[i].project === 'pisa')) {
+                            country = 'it';
+                        } else if (info[i].project === 'spain') {
+                            country = 'es';
+                        }
+                    }
+                    if (country && info[i].site && info[i].id && info[i].interfaces && (info[i].interfaces.length > 0)) {
                         for (index = 0; index < info[i].interfaces.length; index += 1) {
                             detailsop = "device" + index.toString() + "Operator";
                             detailsiccid = "device" + index.toString() + "ICCID";
@@ -379,27 +392,25 @@ app.post('/resynchronise_db', function (req, res) {
 
                         queries.push({
                             query: query,
-                            params: [info[i].country, info[i].site, info[i].id, info[i].hostname, info[i].status, info[i].model,
+                            params: [country, info[i].site, info[i].id, info[i].hostname, info[i].status, info[i].model,
                                      interfaces, ifdetails, info[i].latitude, info[i].longitude]
                         });
                     } else {
-                        console.log("Missing parameters for device", i, ":", info[i].country, info[i].site, info[i].id);
+                        console.log("Missing parameters for device", i, ":", country, info[i].site, info[i].id);
                     }
                 }
 
-                console.log("queries", queries);
-                if (queries.length > 0) {
-                    cassclient.batch(queries, {prepare: true}, function (err) {
-                        if (err) {
-                            console.log("Error:", err.message);
-                            res.status(500).send(err.message);
-                        } else {
-                            res.sendStatus(201);
-                        }
-                    });
-                } else {
-                    res.sendStatus(201);
+                function error_mngr(err) {
+                    if (err) {
+                        console.log("Error:", err.message);
+                        res.status(500).send(err.message);
+                    }
                 }
+                console.log("queries", queries);
+                for (i = 0, index = queries.length; i < index;  i += 20) {
+                    cassclient.batch(queries.slice(i, i + 20), {prepare: true}, error_mngr);
+                }
+                res.sendStatus(201);
             });
         }).on('error', function (e) {
             console.log("Error:", e);
