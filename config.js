@@ -20,16 +20,13 @@
 /*jslint node:true */
 module.exports = function (config) {
     'use strict';
-    // Output directory
-    //config.dest = 'target/gulp';
+    var compress = false;
 
-    config.minify_js = false;
-    config.generate_sourcemaps = false;
-    config.uglify = false;
+    config.strip = compress;
+    config.minify_js = compress;
+    config.generate_sourcemaps = compress;
+    config.uglify = compress;
 
     // Images minification
     config.minify_images = true;
-
-    // Development web server
-    config.connect = false;
 };

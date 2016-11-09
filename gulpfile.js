@@ -46,6 +46,8 @@ var gulp           = require('gulp'),
     path           = require('path'),
     spawn          = require('child_process').spawn,
     gutil          = require('gulp-util'),
+    stripDebug     = require('gulp-strip-debug'),
+    stripComments  = require('gulp-strip-comments'),
     merge2         = require('merge2');
 
 
@@ -271,6 +273,8 @@ gulp.task('js', function () {
             })))
             .pipe(sourcemaps.init())
             .pipe(concat('app.js'))
+            .pipe(config.strip ? stripDebug() : gutil.noop())
+            .pipe(config.strip ? stripComments() : gutil.noop())
             .pipe(ngAnnotate())
             .pipe(config.minify_js ? uglify() : gutil.noop())
             .pipe(rename({suffix: '.min'}))
