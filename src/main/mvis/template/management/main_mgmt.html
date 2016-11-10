@@ -23,7 +23,7 @@
     <table ng-table="nodesTable" show-filter="true" class="table table-condensed table-bordered table-striped">
         <tr ng-repeat="n in nodesData">
             <td data-title="'Country'" sortable="'country'" filter="{'country': 'text'}">{{n.country}}</td>
-            <td data-title="'Site'">{{n.site}}</td>
+            <td data-title="'Site'" sortable="'site'" filter="{'site': 'text'}">{{n.site}}</td>
             <td data-title="'Id'" sortable="'id'" filter="{'id': 'text'}">{{n.id}}</td>
             <td data-title="'Device0'">{{n.device0}}</td>
             <td data-title="'Device1'">{{n.device1}}</td>
