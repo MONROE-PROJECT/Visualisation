@@ -96,7 +96,8 @@ var config = {
             './bower_components/angular-ui-select/dist/select.css',
             './bower_components/select2/select2.css',
             './bower_components/select2/select2.png',
-            './bower_components/ng-table/dist/ng-table.min.css'
+            './bower_components/ng-table/dist/ng-table.min.css',
+            './bower_components/bootstrap/dist/css/bootstrap.min.css'
         ]
     }
 };

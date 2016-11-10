@@ -31,15 +31,8 @@ mvisApp.config(function ($stateProvider, $urlRouterProvider) {
 
     $urlRouterProvider.otherwise('/notfound');
     $stateProvider
-        .state('root', {
-            abstract: true,
-            views: {
-                'layout': { templateUrl: 'template/index.html' }
-            }
-        })
         .state('start', {
             url: '',
-            parent: 'root',
             views: {
                 'main': {
                     templateUrl: 'template/start.html',
@@ -47,29 +40,8 @@ mvisApp.config(function ($stateProvider, $urlRouterProvider) {
                 }
             }
         })
-        .state('login', {
-            url: '/login',
-            parent: 'root',
-            views: {
-                'main': {
-                    templateUrl: 'template/login.html',
-                    controller: 'LoginController'
-                }
-            }
-        })
-        .state('logout', {
-            url: '/logout',
-            parent: 'root',
-            views: {
-                'main': {
-                    templateUrl: 'template/logout.html',
-                    controller: 'LogoutController'
-                }
-            }
-        })
         .state('notfound', {
             url: '/notfound',
-            parent: 'root',
             views: {
                 'main': {
                     templateUrl: 'template/notfound.html'
@@ -78,7 +50,6 @@ mvisApp.config(function ($stateProvider, $urlRouterProvider) {
         })
         .state('error', {
             url: '/error',
-            parent: 'root',
             params: {error: null},
             views: {
                 'main': {
@@ -89,37 +60,28 @@ mvisApp.config(function ($stateProvider, $urlRouterProvider) {
                 }
             }
         })
-        .state('management', {
-            url: '/management',
-            parent: 'root',
-            views: {
-                'main': {
-                    templateUrl: 'template/management/main_mgmt.html',
-                    controller: 'mainMgmtController'
-                },
-                'sidemenu': {
-                    templateUrl: 'template/management/side_mgmt.html',
-                    controller: 'sideMgmtController'
-                }
-            }
-        })
         .state('testbed', {
             url: '/testbed',
             abstract: true,
             views: {
-                'layout': {
+                'main': {
                     templateUrl: 'template/index.html'
-                },
-                'sidemenu@testbed': {
-                    templateUrl: 'template/query.html',
-                    controller: 'queryController'
+                }
+            }
+        })
+        .state('testbed.management', {
+            url: '/management',
+            views: {
+                'info': {
+                    templateUrl: 'template/management/main_mgmt.html',
+                    controller: 'mainMgmtController'
                 }
             }
         })
         .state('testbed.map', {
             url: '/map',
             views: {
-                'main': {
+                'info': {
                     templateUrl: 'template/map/earth.html',
                     controller: 'testbedController'
                 }

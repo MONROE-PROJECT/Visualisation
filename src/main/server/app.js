@@ -104,11 +104,7 @@ var app = express()
 
 // Route
 app.get('/', function (req, res) {
-    res.redirect('/home');
-});
-
-app.get('/home', function (req, res) {
-    res.sendFile(__dirname + '/public/home.html');
+    res.sendFile(__dirname + '/public/index.html');
 });
 
 app.post('/ping', function (req, res) {
@@ -183,6 +179,46 @@ app.get('/states_location', function (req, res) {
             'site': "torino",
             'latitude': 45.0625527,
             'longitude': 7.662398400000029
+        }, {
+            'name': "Bilbao @ Spain (MARiL-in-MONROE)",
+            'type': "external-users",
+            'latitude': 43.2630126,
+            'longitude': -2.9349852000000283
+        }, {
+            'name': "Castelo Branco @ Portugal (MONROE-LTE)",
+            'type': "external-users",
+            'latitude': 39.8197117,
+            'longitude': -7.496466199999986
+        }, {
+            'name': "Cork @ Ireland (SOPHIA)",
+            'type': "external-users",
+            'latitude': 51.8968917,
+            'longitude': -8.486315699999977
+        }, {
+            'name': "Barcelona @ Spain (SOPHIA)",
+            'type': "external-users",
+            'latitude': 41.38506389999999,
+            'longitude': 2.1734034999999494
+        }, {
+            'name': "Ljubljana @ Slovenia  (RICERCANDO)",
+            'type': "external-users",
+            'latitude': 46.0569465,
+            'longitude': 14.505751499999974
+        }, {
+            'name': "Chalkida @ Greece (NESTOR)",
+            'type': "external-users",
+            'latitude': 38.4645245,
+            'longitude': 23.605069500000013
+        }, {
+            'name': "Aberdeen @ Great Britain (PREC)",
+            'type': "external-users",
+            'latitude': 57.149717,
+            'longitude': -2.094278000000031
+        }, {
+            'name': "Athens @ Greece (MOVEMENT)",
+            'type': "external-users",
+            'latitude': 37.9838096,
+            'longitude': 23.727538800000048
         }
     ];
     res.json(info);

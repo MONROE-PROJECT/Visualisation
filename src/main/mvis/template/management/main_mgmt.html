@@ -18,6 +18,8 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 <div>
+    <h3>Nodes Info</h3>
+    <hr>
     <table ng-table="nodesTable" show-filter="true" class="table table-condensed table-bordered table-striped">
         <tr ng-repeat="n in nodesData">
             <td data-title="'Country'" sortable="'country'" filter="{'country': 'text'}">{{n.country}}</td>
@@ -33,14 +35,11 @@
 
 <hr>
 
-<div class="form-group">
-    <input type="text" class="form-control" id="selNodeId" ng-model="selNodeId" placeholder="Select a node id (e.g 1, 2, 109...)">
-</div>
-<div class="form-group">
-    <button class="btn btn-primary" ng-click="getNodeDetails()">Get-Trace</button>
-</div>
-
 <div>
+    <div class="row" style="margin-bottom: 10px;">
+        <div class="col-xs-12 col-sm-6 col-md-8"><input type="text" class="form-control" id="selNodeId" ng-model="selNodeId" placeholder="Select a node id (e.g 1, 2, 109...)"></div>
+        <div class="col-xs-6 col-md-4"><button class="btn btn-primary" ng-click="getNodeDetails()">Get-Trace</button></div>
+    </div>
     <table ng-table="nodeActivity" class="table table-condensed table-bordered table-striped">
         <tr ng-repeat="d in nodeDetails">
             <td data-title="'Id'">{{d.id}}</td>
@@ -54,10 +53,9 @@
 <hr>
 
 <div>
-    <table ng-table="nodesDetailsTable" show-filter="true" class="table table-condensed table-bordered table-striped">
-        <tr ng-repeat="n in nodesDataDetails">
-            <td data-title="'Id'" sortable="'id'" filter="{'id': 'text'}">{{n.id}}</td>
-            <td data-title="'Interface'">{{n.interfaces}}</td>
-        </tr>
-    </table>
+    <div class="row">
+        <div class="col-xs-6 col-sm-4"><input type="text" class="form-control" id="username" ng-model="username" placeholder="username"></div>
+        <div class="col-xs-6 col-sm-4"><input type="password" class="form-control" id="password" ng-model="password" placeholder="password"></div>
+        <div class="col-xs-6 col-sm-4"><button class="btn btn-danger" ng-click="resynch()">Resync DB</button></div>
+    </div>
 </div>

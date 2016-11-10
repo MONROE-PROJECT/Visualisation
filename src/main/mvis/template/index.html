@@ -17,13 +17,41 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
-<div class="container-fluid">
-    <div class="row row-offcanvas row-offcanvas-left">
-        <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar" role="navigation">
-            <div ui-view="sidemenu"></div>
+<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="https://www.monroe-project.eu/"></a>
         </div>
-        <div class="col-xs-12 col-sm-9">
-            <div ui-view="main"><i>select function...</i></div>
+        <div>
+            <ul class="nav navbar-nav">
+                <li><a href="#/testbed/map"><span class="glyphicon glyphicon-home"></span> Home</a></li>
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown">Testbed
+                        <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#/testbed/state/it/pisa">Italy - Pisa</a></li>
+                        <li><a href="#/testbed/state/it/torino">Italy - Torino</a></li>
+                        <li><a href="#/testbed/state/es/spain">Spain</a></li>
+                        <li><a href="#/testbed/state/no/norway">Norway</a></li>
+                        <li><a href="#/testbed/state/se/sweden">Sweden</a></li>
+                    </ul>
+                </li>
+                <li><a href="#/compare"><span class="glyphicon glyphicon-eye-open"></span> Basic Experiments</a></li>
+                <li><a href="#/tstat"><span class="glyphicon glyphicon-road"></span> Tstat</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="#/testbed/management"><span class="glyphicon glyphicon-wrench"></span> Admin</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div class="container-fluid">
+     <div class="row">
+        <div class="panel panel-default">
+            <div class="panel-body" align="center"><div ui-view="info"/></div>
+        </div>
+        <div class="panel panel-default" ng-if="isChartsImplemented">
+            <div class="panel-body" align="center"><div ui-view="charts"/></div>
         </div>
     </div>
 </div>

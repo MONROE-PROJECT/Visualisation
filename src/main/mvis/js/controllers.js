@@ -23,12 +23,6 @@
 
 var mvisControllers = angular.module('mvisControllers', ['ui.router', 'ngStorage', 'mvisServices']);
 
-mvisControllers.controller('NavBarController', ['$scope', function ($scope) {
-    $scope.logged = false;
-    $scope.navbarLinks = [];
-    $scope.settingsLinks = [];
-}]);
-
 mvisControllers.controller('LoginController', ['$scope', '$state', 'mvisService', function ($scope, $state, mvisService) {
     $scope.authenticate = function () {
         $scope.error = null;
@@ -44,13 +38,19 @@ mvisControllers.controller('LoginController', ['$scope', '$state', 'mvisService'
 }]);
 
 mvisControllers.controller('StartController', ['$scope', '$state', 'mvisService', function ($scope, $state, mvisService) {
-    mvisService.ping()
-        .success(function () {
-            $state.go('testbed.map');
-        })
-        .error(function () {
-            $scope.initError = true;
-        });
+    $scope.goToScheduler = function () {
+        $state.go('error', {error: "Not implemented!"});
+    };
+    $scope.goToVisualisation = function () {
+        mvisService.ping()
+            .success(function () {
+                $state.go('testbed.map');
+            })
+            .error(function () {
+                $state.go('error', {error: "Unable to contact the server!"});
+            });
+    };
+    console.log("StartController has been loaded correctly.");
 }]);
 
 mvisControllers.controller('mainMgmtController', ['$scope', '$state', '$filter', 'ngTableParams', 'mvisService', function ($scope, $state, $filter, NgTableParams, mvisService) {
@@ -85,19 +85,6 @@ mvisControllers.controller('mainMgmtController', ['$scope', '$state', '$filter',
                     $scope.nodesData = params.filter() ? $filter('filter')($scope.nodesData, params.filter()) : $scope.nodes;
                     $scope.nodesData = $scope.nodesData.slice((params.page() - 1) * params.count(), params.page() * params.count());
                     $defer.resolve($scope.nodesData);
-                }
-            });
-
-            $scope.nodesDetailsTable = new NgTableParams({
-                count: 5
-            }, {
-                counts: [],
-                total: $scope.nodes.length,
-                getData: function ($defer, params) {
-                    $scope.nodesDataDetails = params.sorting() ? $filter('orderBy')($scope.nodes, params.orderBy()) : $scope.nodes;
-                    $scope.nodesDataDetails = params.filter() ? $filter('filter')($scope.nodesDataDetails, params.filter()) : $scope.nodes;
-                    $scope.nodesDataDetails = $scope.nodesDataDetails.slice((params.page() - 1) * params.count(), params.page() * params.count());
-                    $defer.resolve($scope.nodesDataDetails);
                 }
             });
         })
@@ -181,6 +168,21 @@ mvisControllers.controller('mainMgmtController', ['$scope', '$state', '$filter',
         } else {
             console.log("Interfaces not available for", nodeid);
         }
+    };
+
+    $scope.resynch = function () {
+        var body = {
+            username: $scope.username,
+            password: $scope.password
+        };
+        mvisService.resynchoniseDb(body)
+            .success(function () {
+                alert("Resynchronisation success!");
+                $state.reload();
+            })
+            .error(function (error) {
+                $state.go('error', {error: error});
+            });
     };
 }]);
 
@@ -455,10 +457,13 @@ mvisControllers.controller('testbedController', ['$state', 'mvisService', functi
                 var marker = WE.marker([state.latitude, state.longitude]).addTo(earth);
                 marker.bindPopup("<b>" + state.name + "</b>", {closeButton: false});
 
-                marker.on('dblclick', function () {
-                    console.log("Double-Click event: country=" + state.country + ", site=" + state.site);
-                    $state.go('testbed.state', {country: state.country, site: state.site});
-                });
+                // disable double-clicking for the external users
+                if (state.country && state.site) {
+                    marker.on('dblclick', function () {
+                        console.log("Double-Click event: country=" + state.country + ", site=" + state.site);
+                        $state.go('testbed.state', {country: state.country, site: state.site});
+                    });
+                }
             });
         })
         .error(function (error) {

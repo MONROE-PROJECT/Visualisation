@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<!--
+ MONROE: Visualisation Application.
+ Copyright (C) 2015 Roberto Monno
+
+ Nextworks s.r.l - r DOT monno AT nextworks.it
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<html ng-app="mvisApp" lang="{{ LOCALE }}">
+    <head>
+        <meta charset="utf-8">
+        <title>MONROE VisApp</title>
+        <link rel="stylesheet" href="css/select2.css">
+        <link rel="stylesheet" href="css/select.css">
+        <link rel="stylesheet" href="css/ng-table.min.css">
+        <link rel="stylesheet" href="css/bootstrap.min.css">
+        <link rel="stylesheet" href="css/app.min.css" />
+        <script src="https://maps.googleapis.com/maps/api/js?v=3.24"></script>
+    </head>
+    <body>
+        <div id="wrapper">
+            <div id="content">
+                <div ui-view="main"><i>Loading views...</i></div>
+            </div>
+            <div id="footer-logos">
+                <img src="img/celerway_250px_0.png" alt="celerway-logo" height="80%" align="middle">
+                <img src="img/IMDEA_Logo.png" alt="imdea-logo" height="80%" align="middle">
+                <img src="img/kau-logo.png" alt="kau-logo" height="80%" align="middle">
+                <img src="img/logo-politecnico-di-torino.jpeg" alt="polito-logo" height="80%" align="middle">
+                <img src="img/nextworks.jpg" alt="nextworks-logo" height="80%" align="middle">
+                <img src="img/simula_emodocon_s.jpg" alt="simula-logo" height="80%" align="middle">
+                <img src="img/Telenor_logo.png" alt="telenor-logo" height="80%" align="middle">
+            </div>
+            <div id="footer-notes">
+                <p>MONROE (Measuring Mobile Broadband Networks in Europe) funded by the Commission of the European Union into the H2020 program</p>
+                <p>Roberto Monno at Nextworks [<a href="http://www.nextworks.it/">NXW</a>]</p>
+            </div>
+        </div>
+        <script src="js/app.min.js"></script>
+    </body>
+</html>
