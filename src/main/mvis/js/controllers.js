@@ -54,8 +54,11 @@ mvisControllers.controller('StartController', ['$scope', '$state', 'mvisService'
 }]);
 
 mvisControllers.controller('mainMgmtController', ['$scope', '$state', '$filter', 'ngTableParams', 'mvisService', function ($scope, $state, $filter, NgTableParams, mvisService) {
+    $scope.nodeslength = 0;
+
     mvisService.getAllNodes()
         .success(function (data) {
+            $scope.nodeslength = data.length;
             $scope.nodes = [];
             angular.forEach(data, function (node) {
                 console.log("Node info: ", node);
@@ -480,6 +483,7 @@ mvisControllers.controller('stateRegionController', ['$scope', '$state', '$filte
 
             var gmap = new google.maps.Map(document.getElementById('region_div'), {
                 zoom: 8,
+                mapTypeId: 'satellite',
                 center: {lat: data.centre_latitude, lng: data.centre_longitude}
             }), bounds = new google.maps.LatLngBounds();
 
@@ -492,10 +496,7 @@ mvisControllers.controller('stateRegionController', ['$scope', '$state', '$filte
                         position: position,
                         map: gmap,
                         title: nodeid,
-                        icon: {
-                            url: 'img/case1d2-U-RED-s.jpg',
-                            scaledSize: new google.maps.Size(30, 30)
-                        },
+                        /* icon: {url: 'img/case1d2-U-RED-s.jpg', scaledSize: new google.maps.Size(30, 30)},*/
                         draggable: true,
                         animation: google.maps.Animation.DROP
                     });

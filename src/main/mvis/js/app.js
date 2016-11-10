@@ -90,7 +90,7 @@ mvisApp.config(function ($stateProvider, $urlRouterProvider) {
         .state('testbed.state', {
             url: '/state/{country}/{site}',
             views: {
-                'main': {
+                'info': {
                     templateUrl: 'template/map/state-region.html',
                     controller: 'stateRegionController'
                 }
