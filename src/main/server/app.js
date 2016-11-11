@@ -265,9 +265,9 @@ app.get('/nodes', function (req, res) {
 
 app.get('/nodelastactivityrtt/:nodeid/:interfaces', function (req, res) {
     var interfaces = req.params.interfaces.split(','),
-        query = 'SELECT timestamp, iccid FROM monroe_exp_ping WHERE nodeid = ? AND iccid IN ? LIMIT 1';
+        query = 'SELECT timestamp, iccid FROM monroe_exp_ping WHERE nodeid = ? AND iccid IN ? ORDER BY timestamp DESC LIMIT 1';
 
-    cassclient.execute(query, [req.params.nodeid, interfaces], {prepare: true}, function (err, data) {
+    cassclient.execute(query, [req.params.nodeid, interfaces], {fetchSize: 0}, function (err, data) {
         if (err) {
             console.log("Error:", err.message);
             res.status(500).send(err.message);
@@ -285,9 +285,9 @@ app.get('/nodelastactivityrtt/:nodeid/:interfaces', function (req, res) {
 
 app.get('/nodelastactivitymodem/:nodeid/:interfaces', function (req, res) {
     var interfaces = req.params.interfaces.split(','),
-        query = 'SELECT timestamp, iccid FROM monroe_meta_device_modem WHERE nodeid = ? AND iccid IN ? LIMIT 1';
+        query = 'SELECT timestamp, iccid FROM monroe_meta_device_modem WHERE nodeid = ? AND iccid IN ? ORDER BY timestamp DESC LIMIT 1';
 
-    cassclient.execute(query, [req.params.nodeid, interfaces], {prepare: true}, function (err, data) {
+    cassclient.execute(query, [req.params.nodeid, interfaces], {fetchSize: 0}, function (err, data) {
         if (err) {
             console.log("Error:", err.message);
             res.status(500).send(err.message);

@@ -96,6 +96,19 @@ mvisApp.config(function ($stateProvider, $urlRouterProvider) {
                 }
             }
         })
+        .state('testbed.periodic', {
+            url: '/periodic?country&site&nodeid&timeout',
+            views: {
+                'info': {
+                    templateUrl: 'template/monitoring/periodic.html',
+                    controller: 'periodicInfoController'
+                },
+                'charts': {
+                    templateUrl: 'template/monitoring/periodicCharts.html',
+                    controller: 'periodicChartsController'
+                }
+            }
+        })
         .state('statistic', {
             url: '/statistic',
             abstract: true,
@@ -124,15 +137,6 @@ mvisApp.config(function ($stateProvider, $urlRouterProvider) {
                 'main': {
                     templateUrl: 'template/monitoring/httpdownload.html',
                     controller: 'statHttpDownloadController'
-                }
-            }
-        })
-        .state('statistic.periodic', {
-            url: '/periodic?country&site&nodeid&timeout',
-            views: {
-                'main': {
-                    templateUrl: 'template/monitoring/periodic.html',
-                    controller: 'statPeriodicController'
                 }
             }
         })

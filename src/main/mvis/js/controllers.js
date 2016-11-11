@@ -509,12 +509,12 @@ mvisControllers.controller('stateRegionController', ['$scope', '$state', '$filte
                     model: node.model,
                     status: node.status,
                     interfaces: node.interfaces,
-                    ref: "#/statistic/periodic?country=" + $stateParams.country + "&site=" + $stateParams.site + "&nodeid=" + nodeid + "&timeout=60000"
+                    ref: "#/testbed/periodic?country=" + $stateParams.country + "&site=" + $stateParams.site + "&nodeid=" + nodeid + "&timeout=60000"
                 });
 
                 google.maps.event.addListener(marker, 'click', function () {
                     console.log("Click event: ", marker.getTitle());
-                    $state.go('statistic.periodic', {
+                    $state.go('testbed.periodic', {
                         country: $stateParams.country,
                         site: $stateParams.site,
                         nodeid: marker.getTitle(),
@@ -848,16 +848,13 @@ mvisControllers.controller('statHttpDownloadController', ['$scope', '$stateParam
     }
 }]);
 
-mvisControllers.controller('statPeriodicController', ['$scope', '$stateParams', '$state', '$interval', 'mvisService', function ($scope, $stateParams, $state, $interval, mvisService) {
-    console.log("statPeriodicController country=" + $stateParams.country  + ", site=" + $stateParams.site + ", nodeid=" + $stateParams.nodeid +
-                ", timeout=" + $stateParams.timeout);
+mvisControllers.controller('periodicInfoController', ['$scope', '$stateParams', '$state', '$interval', 'mvisService', function ($scope, $stateParams, $state, $interval, mvisService) {
+    console.log("periodicInfoController", $stateParams);
 
     $scope.uid = $stateParams.nodeid;
     $scope.timers = [];
 
-    // this is the (real) management task
-    var rttchart, signalstrengthchart, cpuchart, httpspeedchart,
-        nodeid = mvisService.decomposeNodeId($stateParams.nodeid);
+    var nodeid = mvisService.decomposeNodeId($stateParams.nodeid);
 
     function createTracker(info, inivalues) {
         var center = (info.current.lat && info.current.lng) ? {lat: info.current.lat, lng: info.current.lng} : {lat: info.centre.lat, lng: info.centre.lng},
@@ -880,6 +877,84 @@ mvisControllers.controller('statPeriodicController', ['$scope', '$stateParams', 
         polyline.setMap(gmap);
         return {gmap: gmap, polyline: polyline, marker: marker};
     }
+
+    function periodicGPSUpdateBuffer(c, s, nid, t, points, fn, buffer) {
+        var timestamp = t, mintimestamp,
+            timer = $interval(function () {
+                mintimestamp = timestamp;
+                timestamp = new Date().getTime();
+
+                fn(c, s, nid, timestamp, mintimestamp, points)
+                    .success(function (info) {
+                        console.log("DATA: ", info.data);
+                        buffer.push.apply(buffer, info.data);
+                    })
+                    .error(function (error) {
+                        $state.go('error', {error: error});
+                    });
+            }, (points * 1000));
+        $scope.timers.push(timer);
+    }
+
+    function periodicGPSDrawBuffer(track, timeout, buffer, type) {
+        var value,
+            timer = $interval(function () {
+                value = buffer.shift();
+                console.log(type, "buffered value:", value);
+                if (value) {
+                    track.marker.setPosition(new google.maps.LatLng(value.lat, value.lng));
+                    track.marker.setTitle("Lat: " + value.lat + ", Lng: " + value.lng);
+                    track.polyline.getPath().push(new google.maps.LatLng(value.lat, value.lng));
+                }
+            }, (timeout * 1000));
+        $scope.timers.push(timer);
+    }
+
+    function gpsPeriodicLoadData(country, site, nodeid) {
+        var tracker, slicedata,
+            timestamp = new Date().getTime(),
+            mintimestamp = mvisService.getMinTimestamp(timestamp, "1 hour before"),
+            gpsBuffer = [];
+
+        mvisService.getGps(country, site, nodeid, timestamp, mintimestamp, 118)
+            .success(function (info) {
+                console.log("GPS: ", info);
+                slicedata = info.data.slice(0, parseInt(info.data.length / 2, 10));
+                tracker = createTracker(info, slicedata);
+
+                slicedata = info.data.slice(parseInt(info.data.length / 2, 10), info.data.length);
+                gpsBuffer.push.apply(gpsBuffer, slicedata);
+
+                periodicGPSUpdateBuffer(country, site, nodeid, timestamp, 59, mvisService.getGps, gpsBuffer);
+                periodicGPSDrawBuffer(tracker, 1, gpsBuffer, "GPS");
+            })
+            .error(function (error) {
+                $state.go('error', {error: error});
+            });
+    }
+
+    gpsPeriodicLoadData($stateParams.country, $stateParams.site, nodeid);
+
+    // stop timers when the controller is destroyed
+    $scope.$on("$destroy", function () {
+        var i, len;
+        for (i = 0, len = $scope.timers.length; i < len; i += 1) {
+            if (angular.isDefined($scope.timers[i])) {
+                $interval.cancel($scope.timers[i]);
+            }
+        }
+    });
+}]);
+
+mvisControllers.controller('periodicChartsController', ['$scope', '$stateParams', '$state', '$interval', 'mvisService', function ($scope, $stateParams, $state, $interval, mvisService) {
+    console.log("periodicChartsController", $stateParams);
+
+    $scope.uid = $stateParams.nodeid;
+    $scope.timers = [];
+
+    // this is the (real) management task
+    var rttchart, signalstrengthchart, cpuchart, httpspeedchart,
+        nodeid = mvisService.decomposeNodeId($stateParams.nodeid);
 
     function periodicUpdateBuffer(nid, iid, t, points, fn, buffer) {
         var timestamp = t, mintimestamp,
@@ -917,24 +992,6 @@ mvisControllers.controller('statPeriodicController', ['$scope', '$stateParams', 
         $scope.timers.push(timer);
     }
 
-    function periodicGPSUpdateBuffer(c, s, nid, t, points, fn, buffer) {
-        var timestamp = t, mintimestamp,
-            timer = $interval(function () {
-                mintimestamp = timestamp;
-                timestamp = new Date().getTime();
-
-                fn(c, s, nid, timestamp, mintimestamp, points)
-                    .success(function (info) {
-                        console.log("DATA: ", info.data);
-                        buffer.push.apply(buffer, info.data);
-                    })
-                    .error(function (error) {
-                        $state.go('error', {error: error});
-                    });
-            }, (points * 1000));
-        $scope.timers.push(timer);
-    }
-
     function periodicDrawBuffer(data, timeout, buffer, type) {
         var value,
             timer = $interval(function () {
@@ -942,20 +999,6 @@ mvisControllers.controller('statPeriodicController', ['$scope', '$stateParams', 
                 console.log(type, "buffered value:", value);
                 if (value) {
                     data.addPoint(value, true, true);
-                }
-            }, (timeout * 1000));
-        $scope.timers.push(timer);
-    }
-
-    function periodicGPSDrawBuffer(track, timeout, buffer, type) {
-        var value,
-            timer = $interval(function () {
-                value = buffer.shift();
-                console.log(type, "buffered value:", value);
-                if (value) {
-                    track.marker.setPosition(new google.maps.LatLng(value.lat, value.lng));
-                    track.marker.setTitle("Lat: " + value.lat + ", Lng: " + value.lng);
-                    track.polyline.getPath().push(new google.maps.LatLng(value.lat, value.lng));
                 }
             }, (timeout * 1000));
         $scope.timers.push(timer);
@@ -1053,29 +1096,6 @@ mvisControllers.controller('statPeriodicController', ['$scope', '$stateParams', 
             });
     }
 
-    function gpsPeriodicLoadData(country, site, nodeid) {
-        var tracker, slicedata,
-            timestamp = new Date().getTime(),
-            mintimestamp = mvisService.getMinTimestamp(timestamp, "1 hour before"),
-            gpsBuffer = [];
-
-        mvisService.getGps(country, site, nodeid, timestamp, mintimestamp, 118)
-            .success(function (info) {
-                console.log("GPS: ", info);
-                slicedata = info.data.slice(0, parseInt(info.data.length / 2, 10));
-                tracker = createTracker(info, slicedata);
-
-                slicedata = info.data.slice(parseInt(info.data.length / 2, 10), info.data.length);
-                gpsBuffer.push.apply(gpsBuffer, slicedata);
-
-                periodicGPSUpdateBuffer(country, site, nodeid, timestamp, 59, mvisService.getGps, gpsBuffer);
-                periodicGPSDrawBuffer(tracker, 1, gpsBuffer, "GPS");
-            })
-            .error(function (error) {
-                $state.go('error', {error: error});
-            });
-    }
-
     function getPeriodicAllRTT(nodeid, ifaces) {
         console.log("getPeriodicAllRTT nodeid", nodeid, ", ifaces", ifaces);
         rttchart = mvisService.createRTTStockChart(function () {
@@ -1159,8 +1179,6 @@ mvisControllers.controller('statPeriodicController', ['$scope', '$stateParams', 
         .error(function (error) {
             $state.go('error', {error: error});
         });
-
-    gpsPeriodicLoadData($stateParams.country, $stateParams.site, nodeid);
 
     // stop timers when the controller is destroyed
     $scope.$on("$destroy", function () {

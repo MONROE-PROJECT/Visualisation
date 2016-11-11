@@ -50,8 +50,6 @@
         <div class="panel panel-default">
             <div class="panel-body" align="center"><div ui-view="info"/></div>
         </div>
-        <div class="panel panel-default" ng-if="isChartsImplemented">
-            <div class="panel-body" align="center"><div ui-view="charts"/></div>
-        </div>
+        <div ui-view="charts"/>
     </div>
 </div>

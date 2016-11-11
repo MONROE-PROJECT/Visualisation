@@ -5,3 +5,5 @@ logs
 *.log
 node_modules
 bower_components
+
+src/main/server/client.p12
