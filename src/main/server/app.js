@@ -379,6 +379,23 @@ app.get('/node_interfaces/:country/:site/:nodeid', function (req, res) {
         });
 });
 
+app.get('/node_ifdetails/:country/:site/:nodeid', function (req, res) {
+    // prepared query to the CASSANDRA-DB
+    var table = 'devices',
+        query = 'SELECT IfDetails FROM ' + table + ' WHERE country = ? AND site = ? AND nodeid = ?';
+
+    cassclient.execute(query, [req.params.country, req.params.site, req.params.nodeid],
+                       {prepare: true}, function (err, data) {
+            if (err) {
+                console.log("Error:", err.message);
+                res.status(500).send(err.message);
+            } else {
+                console.log("data", JSON.stringify(data));
+                res.json(data.rows);
+            }
+        });
+});
+
 app.post('/resynchronise_db', function (req, res) {
     console.log("Body:", req.body);
     if ((req.body.username !== "monroeadmin") || (req.body.password !== "monroeadmin")) {

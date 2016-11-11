@@ -115,6 +115,10 @@ mvisServices.service('mvisService', ['$http', function ($http) {
         return $http.get('/node_interfaces/' + country + '/' + site + '/' + nodeid);
     };
 
+    this.getIfDetails = function (country, site, nodeid) {
+        return $http.get('/node_ifdetails/' + country + '/' + site + '/' + nodeid);
+    };
+
     this.getRTT = function (nodeid, ifaceid, timestamp, mintimestamp, resolution) {
         return $http.get('/rtt/' + nodeid + '/' + ifaceid + '/' + timestamp + "/" + mintimestamp + "/" + resolution);
     };

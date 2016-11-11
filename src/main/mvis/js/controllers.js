@@ -848,7 +848,7 @@ mvisControllers.controller('statHttpDownloadController', ['$scope', '$stateParam
     }
 }]);
 
-mvisControllers.controller('periodicInfoController', ['$scope', '$stateParams', '$state', '$interval', 'mvisService', function ($scope, $stateParams, $state, $interval, mvisService) {
+mvisControllers.controller('periodicInfoController', ['$scope', '$stateParams', '$state', '$interval', 'ngTableParams', 'mvisService', function ($scope, $stateParams, $state, $interval, NgTableParams, mvisService) {
     console.log("periodicInfoController", $stateParams);
 
     $scope.uid = $stateParams.nodeid;
@@ -944,6 +944,37 @@ mvisControllers.controller('periodicInfoController', ['$scope', '$stateParams', 
             }
         }
     });
+
+    $scope.nodeData = [];
+    $scope.nodeTable = new NgTableParams({
+        count: 5
+    }, {
+        counts: [],
+        total: $scope.nodeData.length,
+        getData: function ($defer, params) {
+            $scope.nodeData = $scope.nodeData.slice((params.page() - 1) * params.count(), params.page() * params.count());
+            $defer.resolve($scope.nodeData);
+        }
+    });
+
+    mvisService.getIfDetails($stateParams.country, $stateParams.site, nodeid)
+        .success(function (info) {
+            console.log("IfDetails: ", info);
+            if (info.length !== 1) {
+                $state.go('error', {error: 'Unable to retrieve the Node-Interface details!'});
+            }
+            var tmp = {
+                id: nodeid,
+                device0: mvisService.composeModemName(info[0].ifdetails.device0Operator, info[0].ifdetails.device0ICCID),
+                device1: mvisService.composeModemName(info[0].ifdetails.device1Operator, info[0].ifdetails.device1ICCID),
+                device2: mvisService.composeModemName(info[0].ifdetails.device2Operator, info[0].ifdetails.device2ICCID),
+                device3: mvisService.composeModemName(info[0].ifdetails.device3Operator, info[0].ifdetails.device3ICCID)
+            };
+            $scope.nodeData.push(tmp);
+        })
+        .error(function (error) {
+            $state.go('error', {error: error});
+        });
 }]);
 
 mvisControllers.controller('periodicChartsController', ['$scope', '$stateParams', '$state', '$interval', 'mvisService', function ($scope, $stateParams, $state, $interval, mvisService) {
