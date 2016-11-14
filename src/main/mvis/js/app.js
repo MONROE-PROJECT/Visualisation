@@ -127,46 +127,12 @@ mvisApp.config(function ($stateProvider, $urlRouterProvider) {
                 }
             }
         })
-        .state('statistic', {
-            url: '/statistic',
-            abstract: true,
-            views: {
-                'layout': {
-                    templateUrl: 'template/index.html'
-                },
-                'sidemenu@statistic': {
-                    templateUrl: 'template/query.html',
-                    controller: 'queryController'
-                }
-            }
-        })
-        .state('statistic.ping', {
-            url: '/ping?testbedid&nodeid&ifaceid&timestamp&mintimestamp&resolution',
-            views: {
-                'main': {
-                    templateUrl: 'template/monitoring/networking.html',
-                    controller: 'statPingController'
-                }
-            }
-        })
         .state('statistic.http-download', {
             url: '/httpdownload?testbedid&nodeid&ifaceid&timestamp&mintimestamp&resolution',
             views: {
                 'main': {
                     templateUrl: 'template/monitoring/httpdownload.html',
                     controller: 'statHttpDownloadController'
-                }
-            }
-        })
-        .state('compare', {
-            url: '/compare',
-            views: {
-                'layout': {
-                    templateUrl: 'template/scheduler/index.html'
-                },
-                'main@compare': {
-                    templateUrl: 'template/compare/main_compare.html',
-                    controller: 'mainCompareController'
                 }
             }
         })
