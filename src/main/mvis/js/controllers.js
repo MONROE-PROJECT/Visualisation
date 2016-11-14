@@ -1317,13 +1317,59 @@ mvisControllers.controller('experimentInfoController', ['$scope', '$state', 'mvi
 mvisControllers.controller('experimentBasicController', ['$scope', '$state', 'mvisService', 'mvisQueryService', function ($scope, $state, mvisService, mvisQueryService) {
     console.log("experimentBasicController");
 
-    var rttchart;
+    var rttchart, packetlosschart, signalstrengthchart, connectiontypechart;
 
     function rttLoadData(nodeid, ifaceid, timestamp, mintimestamp, resolution, series) {
         console.log("rttLoadData series", nodeid, ifaceid);
         mvisService.getRTT(nodeid, ifaceid, timestamp, mintimestamp, resolution)
             .success(function (data) {
                 console.log("RTT: ", data);
+                series.setData(data, true, true);
+            })
+            .error(function (error) {
+                $state.go('error', {error: error});
+            });
+    }
+    function packetlossLoadData(nodeid, ifaceid, timestamp, mintimestamp, resolution, series) {
+        console.log("packetlossLoadData series", nodeid, ifaceid);
+        mvisService.getPacketLoss(nodeid, ifaceid, timestamp, mintimestamp, resolution)
+            .success(function (data) {
+                console.log("PacketLoss: ", data);
+                var i, num, tmp = {loss: 0, tot: 0, last: 0};
+                for (i = 0; i < data.length; i += 1) {
+                    tmp.tot += 1;
+                    if (tmp.tot !== 1) {
+                        num = parseInt(data[i], 10) - tmp.last;
+                        if (num !== 1) {
+                            tmp.loss += 1;
+                        }
+                    }
+                    tmp.last = parseInt(data[i], 10);
+                }
+                console.log("PacketLoss calculation", tmp);
+                num = (tmp.tot === 0) ? 0 : Math.round((tmp.loss * 100) / tmp.tot);
+                series.setData([num], true, true);
+            })
+            .error(function (error) {
+                $state.go('error', {error: error});
+            });
+    }
+    function signalStrengthLoadData(nodeid, ifaceid, timestamp, mintimestamp, resolution, series) {
+        console.log("signalStrengthLoadData series", nodeid, ifaceid);
+        mvisService.getSignalStrength(nodeid, ifaceid, timestamp, mintimestamp, resolution)
+            .success(function (data) {
+                console.log("SignalStrength: ", data);
+                series.setData(data, true, true);
+            })
+            .error(function (error) {
+                $state.go('error', {error: error});
+            });
+    }
+    function connectionTypeLoadData(nodeid, ifaceid, timestamp, mintimestamp, resolution, series) {
+        console.log("connectionTypeLoadData series", nodeid, ifaceid);
+        mvisService.getConnectionType(nodeid, ifaceid, timestamp, mintimestamp, resolution)
+            .success(function (data) {
+                console.log("ConnectionType: ", data);
                 series.setData(data, true, true);
             })
             .error(function (error) {
@@ -1350,6 +1396,68 @@ mvisControllers.controller('experimentBasicController', ['$scope', '$state', 'mv
             rttLoadData(nodeIDs[0], nodeIDs[1], timestamp, mintimestamp, resolution, series);
         });
     }
+    function getPacketLoss(nodeiface, timestamp, mintimestamp, resolution) {
+        console.log("getPacketLoss nodeiface", nodeiface, ", timestamp", timestamp,
+                    ", mintimestamp", mintimestamp, ", resolution", resolution);
+        packetlosschart = mvisService.createPacketLossChart(function () {
+            var i, ret = [];
+            angular.forEach(nodeiface, function (nif) {
+                if (nif !== "") {
+                    ret.push({
+                        name: nif,
+                        data: []
+                    });
+                }
+            });
+            return ret;
+        }, function (series) {
+            var nodeIDs = series.name.replace(" - ", "-").split("-");
+            packetlossLoadData(nodeIDs[0], nodeIDs[1], timestamp, mintimestamp, resolution, series);
+        });
+    }
+    function getSignalStrength(nodeiface, timestamp, mintimestamp, resolution) {
+        console.log("getSignalStrength nodeiface", nodeiface, ", timestamp", timestamp,
+                    ", mintimestamp", mintimestamp, ", resolution", resolution);
+        signalstrengthchart = mvisService.createSignalStrenghtChart(function () {
+            var i, ret = [];
+            angular.forEach(nodeiface, function (nif) {
+                if (nif !== "") {
+                    ret.push({
+                        type: "column",
+                        name: nif,
+                        data: []
+                    });
+                }
+            });
+            return ret;
+        }, function (series) {
+            var nodeIDs = series.name.replace(" - ", "-").split("-");
+            signalStrengthLoadData(nodeIDs[0], nodeIDs[1], timestamp, mintimestamp, resolution, series);
+        });
+    }
+    function getConnectionType(nodeiface, timestamp, mintimestamp, resolution) {
+        console.log("getConnectionType nodeiface", nodeiface, ", timestamp", timestamp,
+                    ", mintimestamp", mintimestamp, ", resolution", resolution);
+        connectiontypechart = mvisService.createConnectionTypeChart(function () {
+            var i, ret = [], x = Math.round(100 / (nodeiface.length - 1));
+            for (i = 0; i < nodeiface.length; i += 1) {
+                if (nodeiface[i] !== "") {
+                    ret.push({
+                        name: nodeiface[i],
+                        colorByPoint: true,
+                        center: [Math.round((x / 2) + (i * x)) + "%", "50%"],
+                        size: '75%',
+                        data: []
+                    });
+                }
+            }
+            return ret;
+        }, function (series) {
+            var nodeIDs = series.name.replace(" - ", "-").split("-");
+            connectionTypeLoadData(nodeIDs[0], nodeIDs[1], timestamp, mintimestamp, resolution, series);
+        });
+    }
+
     $scope.submit = function () {
         try {
             console.info("QueryInfo", mvisQueryService);
@@ -1362,9 +1470,12 @@ mvisControllers.controller('experimentBasicController', ['$scope', '$state', 'mv
 
             console.log("SelNodes", selnodes);
             getRTT(selnodes, date_time, min_timestamp, mvisQueryService.resolution);
+            getPacketLoss(selnodes, date_time, min_timestamp, mvisQueryService.resolution);
+            getSignalStrength(selnodes, date_time, min_timestamp, mvisQueryService.resolution);
+            getConnectionType(selnodes, date_time, min_timestamp, mvisQueryService.resolution);
+
         } catch (err) {
-            var msg = "Invalid filters!\n";
-            alert(msg + err.message);
+            alert("Invalid filters!\n" + err.message);
         }
     };
 }]);
