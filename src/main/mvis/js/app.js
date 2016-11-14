@@ -64,9 +64,7 @@ mvisApp.config(function ($stateProvider, $urlRouterProvider) {
             url: '/testbed',
             abstract: true,
             views: {
-                'main': {
-                    templateUrl: 'template/index.html'
-                }
+                'main': {templateUrl: 'template/index.html'}
             }
         })
         .state('testbed.management', {
@@ -106,6 +104,26 @@ mvisApp.config(function ($stateProvider, $urlRouterProvider) {
                 'charts': {
                     templateUrl: 'template/monitoring/periodicCharts.html',
                     controller: 'periodicChartsController'
+                }
+            }
+        })
+        .state('experiment', {
+            url: '/experiment',
+            abstract: true,
+            views: {
+                'main': {templateUrl: 'template/index.html'}
+            }
+        })
+        .state('experiment.basic', {
+            url: '/basic',
+            views: {
+                'info': {
+                    templateUrl: 'template/experiment/info.html',
+                    controller: 'experimentInfoController'
+                },
+                'charts': {
+                    templateUrl: 'template/experiment/basicCharts.html',
+                    controller: 'experimentBasicController'
                 }
             }
         })

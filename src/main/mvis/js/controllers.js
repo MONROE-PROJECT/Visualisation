@@ -1222,7 +1222,7 @@ mvisControllers.controller('periodicChartsController', ['$scope', '$stateParams'
     });
 }]);
 
-mvisControllers.controller('mainCompareController', ['$scope', '$state', 'mvisService', 'mvisQueryService', function ($scope, $state, mvisService, mvisQueryService) {
+mvisControllers.controller('experimentInfoController', ['$scope', '$state', 'mvisService', 'mvisQueryService', function ($scope, $state, mvisService, mvisQueryService) {
     $scope.date = new Date();
     $scope.time = new Date();
     $scope.disabledT = false;
@@ -1232,14 +1232,13 @@ mvisControllers.controller('mainCompareController', ['$scope', '$state', 'mvisSe
     $scope.selectedtuple = "";
 
     $scope.timeslot = {};
-    $scope.timeslots = [
-        {id: "1 hour before"}, {id: "6 hours before"}, {id: "24 hours before"}, {id: "48 hours before"}
-    ];
+    $scope.timeslots = [{id: "1 hour in the past"}, {id: "6 hours in the past"}, {id: "24 hours in the past"}, {id: "48 hours in the past"}];
 
     $scope.resolution = {};
-    $scope.resolutions = [
-        {id: 100}, {id: 500}, {id: 1000}, {id: 2000}, {id: 3000}
-    ];
+    $scope.resolutions = [{id: 100}, {id: 500}, {id: 1000}, {id: 2000}, {id: 3000}, {id: 4000}, {id: 5000}];
+
+    $scope.testbed = {};
+    $scope.testbeds = [{id: "it - pisa"}, {id: "it - torino"}, {id: "es - spain"}, {id: "no - norway"}, {id: "se - sweden"}];
 
     $scope.openDate = function ($event) {
         $event.preventDefault();
@@ -1247,24 +1246,26 @@ mvisControllers.controller('mainCompareController', ['$scope', '$state', 'mvisSe
         $scope.openedD = true;
     };
 
-    mvisService.getAllNodes()
-        .success(function (data) {
-            $scope.nodes = [];
-            angular.forEach(data, function (node) {
-                console.log("Node info: ", node);
-                var ret = {
-                    country: node.country,
-                    site: node.site,
-                    id: mvisService.composeNodeName(node.nodeid, node.displayname, node.hostname),
-                    interfaces: node.interfaces,
-                    nodeid: node.nodeid
-                };
-                this.push(ret);
-            }, $scope.nodes);
-        })
-        .error(function (error) {
-            $state.go('error', {error: error});
-        });
+    $scope.testbedSelected = function ($model) {
+        console.log("Selected testbed", $model.id);
+        var x = $model.id.replace(" - ", "-").split("-");
+        mvisService.getNodesName(x[0], x[1])
+            .success(function (data) {
+                console.log("Nodes info", data);
+
+                $scope.nodes = [];
+                angular.forEach(data, function (node) {
+                    $scope.nodes.push({
+                        country: x[0],
+                        site: x[1],
+                        id: mvisService.composeNodeName(node.nodeid, node.displayname, node.hostname)
+                    });
+                });
+            })
+            .error(function (error) {
+                $state.go('error', {error: error});
+            });
+    };
 
     $scope.nodeSelected = function ($model) {
         console.log("Selected node", $model);
@@ -1292,6 +1293,30 @@ mvisControllers.controller('mainCompareController', ['$scope', '$state', 'mvisSe
         $scope.selectedtuple += "(" + nodeIDs[0] + " - " + $model.id + ")";
     };
 
+    $scope.submit = function () {
+        if (!$scope.timeslot.hasOwnProperty('selected')) {
+            alert("Please specify the timeslot!");
+
+        } else if (!$scope.resolution.hasOwnProperty('selected')) {
+            alert("Please specify the resolution!");
+
+        } else if ($scope.selectedtuple === "") {
+            alert("Please select node and interface!");
+
+        } else {
+            var nodeIDs = $scope.node.selected.id.replace(" - ", "-").split("-");
+            mvisQueryService.save($scope.date, $scope.time, $scope.timeslot.selected.id, '', $scope.selectedtuple, '', '', $scope.resolution.selected.id);
+        }
+    };
+
+    $scope.$on("$destroy", function () {
+        mvisQueryService.reset();
+    });
+}]);
+
+mvisControllers.controller('experimentBasicController', ['$scope', '$state', 'mvisService', 'mvisQueryService', function ($scope, $state, mvisService, mvisQueryService) {
+    console.log("experimentBasicController");
+
     var rttchart;
 
     function rttLoadData(nodeid, ifaceid, timestamp, mintimestamp, resolution, series) {
@@ -1305,7 +1330,6 @@ mvisControllers.controller('mainCompareController', ['$scope', '$state', 'mvisSe
                 $state.go('error', {error: error});
             });
     }
-
     function getRTT(nodeiface, timestamp, mintimestamp, resolution) {
         console.log("getRTT nodeiface", nodeiface, ", timestamp", timestamp,
                     ", mintimestamp", mintimestamp, ", resolution", resolution);
@@ -1326,26 +1350,21 @@ mvisControllers.controller('mainCompareController', ['$scope', '$state', 'mvisSe
             rttLoadData(nodeIDs[0], nodeIDs[1], timestamp, mintimestamp, resolution, series);
         });
     }
-
     $scope.submit = function () {
-        if (!$scope.timeslot.hasOwnProperty('selected')) {
-            alert("Please specify the timeslot!");
+        try {
+            console.info("QueryInfo", mvisQueryService);
 
-        } else if (!$scope.resolution.hasOwnProperty('selected')) {
-            alert("Please specify the resolution!");
-
-        } else if ($scope.selectedtuple === "") {
-            alert("Please select node and interface!");
-
-        } else {
-            var date_time = mvisQueryService.getUTCtime($scope.date, $scope.time),
-                min_timestamp = mvisService.getMinTimestamp(date_time, $scope.timeslot.selected.id),
-                selnodes = $scope.selectedtuple.split("(").join("").split(")");
+            var date_time = mvisQueryService.getUTCtime(mvisQueryService.date, mvisQueryService.time),
+                min_timestamp = mvisService.getMinTimestamp(date_time, mvisQueryService.timeslot),
+                selnodes = mvisQueryService.node.split("(").join("").split(")");
             console.log("date-time", date_time, ", UTC time", new Date(date_time).toUTCString(),
                         ", min-timestamp", min_timestamp, ", UTC min time", new Date(min_timestamp).toUTCString());
 
             console.log("SelNodes", selnodes);
-            getRTT(selnodes, date_time, min_timestamp, $scope.resolution.selected.id);
+            getRTT(selnodes, date_time, min_timestamp, mvisQueryService.resolution);
+        } catch (err) {
+            var msg = "Invalid filters!\n";
+            alert(msg + err.message);
         }
     };
 }]);

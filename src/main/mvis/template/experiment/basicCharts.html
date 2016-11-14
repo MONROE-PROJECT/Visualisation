@@ -1,0 +1,54 @@
+<!--
+ MONROE: Visualisation Application.
+ Copyright (C) 2015 Roberto Monno
+
+ Nextworks s.r.l - r DOT monno AT nextworks.it
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<button class="btn btn-success" ng-click="submit()" style="width:100%;">Draw Now!</button>
+<hr>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-xs-6">
+            <div class="panel panel-default">
+                <div class="panel-heading"><h3 class="panel-title">RTT</h3></div>
+                <div class="panel-body" id="rtt-chart"></div>
+            </div>
+        </div>
+        <div class="col-xs-6">
+            <div class="panel panel-default">
+                <div class="panel-heading"><h3 class="panel-title">Packet-Loss</h3></div>
+                <div class="panel-body" id="packet-loss-chart"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-xs-6">
+            <div class="panel panel-default">
+                <div class="panel-heading"><h3 class="panel-title">Technology</h3></div>
+                <div class="panel-body" id="connection-type-chart"></div>
+            </div>
+        </div>
+        <div class="col-xs-6">
+            <div class="panel panel-default">
+                <div class="panel-heading"><h3 class="panel-title">Signal-Strength</h3></div>
+                <div class="panel-body" id="signal-strength-chart"></div>
+            </div>
+        </div>
+    </div>
+</div>

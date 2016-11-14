@@ -51,13 +51,13 @@ mvisServices.service('mvisService', ['$http', function ($http) {
 
     this.getMinTimestamp = function (timestamp, timeslot) {
         var x = timestamp - (60 * 60 * 1000); // 1 hour before
-        if (timeslot === "48 hours before") {
+        if (timeslot === "48 hours in the past") {
             x = timestamp - (48 * 60 * 60 * 1000);
 
-        } else if (timeslot === "24 hours before") {
+        } else if (timeslot === "24 hours in the past") {
             x = timestamp - (24 * 60 * 60 * 1000);
 
-        } else if (timeslot === "6 hours before") {
+        } else if (timeslot === "6 hours in the past") {
             x = timestamp - (6 * 60 * 60 * 1000);
         }
         return x;
@@ -658,6 +658,17 @@ mvisServices.factory('mvisQueryService', function () {
         query.iface = iface;
         query.experiment = experiment;
         query.resolution = resolution;
+    };
+
+    query.reset = function () {
+        query.date = new Date();
+        query.time = new Date();
+        query.timeslot = {};
+        query.testbed = {};
+        query.node = {};
+        query.iface = {};
+        query.experiment = {};
+        query.resolution = {};
     };
 
     query.getUTCtime = function (date, time) {
