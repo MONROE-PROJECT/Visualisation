@@ -368,7 +368,61 @@ mvisControllers.controller('periodicInfoController', ['$scope', '$stateParams', 
             });
     }
 
+    function periodicEventUpdate(values, data) {
+        console.log("Events", values);
+
+        data.slice(0);
+        angular.forEach(values, function (e) {
+            this.push({
+                timestamp: (new Date(Math.floor(e.timestamp * 1000))).toString(),
+                message: e.message,
+                eventtype: e.eventtype
+            });
+        }, data);
+    }
+
+    function eventPeriodicLoadData(nodeid) {
+        $scope.nodeEventData = [];
+        $scope.nodeEventTable = new NgTableParams({
+            count: 5
+        }, {
+            counts: [],
+            total: $scope.nodeEventData.length,
+            getData: function ($defer, params) {
+                $scope.nodeEventData = $scope.nodeEventData.slice((params.page() - 1) * params.count(), params.page() * params.count());
+                $defer.resolve($scope.nodeEventData);
+            }
+        });
+
+        var timestamp =  new Date().getTime(),
+            mintimestamp = mvisService.getMinTimestamp(timestamp, "1 hour before");
+
+        mvisService.getEvents(nodeid, timestamp, mintimestamp, 5)
+            .success(function (info) {
+                periodicEventUpdate(info, $scope.nodeEventData);
+
+                var timer = $interval(function () {
+                    mintimestamp = timestamp;
+                    timestamp =  new Date().getTime();
+
+                    mvisService.getEvents(nodeid, timestamp, mintimestamp, 5)
+                        .success(function (info) {
+                            periodicEventUpdate(info, $scope.nodeEventData);
+                        })
+                        .error(function (error) {
+                            $state.go('error', {error: error});
+                        });
+
+                }, (60 * 1000));
+                $scope.timers.push(timer);
+            })
+            .error(function (error) {
+                $state.go('error', {error: error});
+            });
+    }
+
     gpsPeriodicLoadData($stateParams.country, $stateParams.site, nodeid);
+    eventPeriodicLoadData(nodeid);
 
     // stop timers when the controller is destroyed
     $scope.$on("$destroy", function () {

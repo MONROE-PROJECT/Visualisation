@@ -147,6 +147,10 @@ mvisServices.service('mvisService', ['$http', function ($http) {
         return $http.get('/gps/' + country + '/' + site + '/' + nodeid + '/' + timestamp + "/" + mintimestamp + "/" + resolution);
     };
 
+    this.getEvents = function (nodeid, timestamp, mintimestamp, resolution) {
+        return $http.get('/events/' + nodeid + '/' + timestamp + "/" + mintimestamp + "/" + resolution);
+    };
+
     // Chart utilities
     this.createRTTChart = function (initcallback, loadcallback) {
         return new Highcharts.Chart({
