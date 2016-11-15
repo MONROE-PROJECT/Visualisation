@@ -143,6 +143,10 @@ mvisServices.service('mvisService', ['$http', function ($http) {
         return $http.get('/tstatthroughput/' + nodeid + '/' + ifaceid + '/' + timestamp + "/" + mintimestamp + "/" + resolution);
     };
 
+    this.getTstatRtt = function (nodeid, ifaceid, timestamp, mintimestamp, resolution) {
+        return $http.get('/tstatrtt/' + nodeid + '/' + ifaceid + '/' + timestamp + "/" + mintimestamp + "/" + resolution);
+    };
+
     this.getCPU = function (nodeid, timestamp, mintimestamp, resolution) {
         return $http.get('/cpu/' + nodeid + '/' + timestamp + "/" + mintimestamp + "/" + resolution);
     };
@@ -677,6 +681,47 @@ mvisServices.service('mvisService', ['$http', function ($http) {
             legend: {enabled: true},
             plotOptions: {
                 column: {depth: 25}
+            },
+            series: initcallback()
+        });
+    };
+
+    this.createSplineChart = function (chart, titletext, initcallback, loadcallback) {
+        return new Highcharts.Chart({
+            chart: {
+                renderTo: chart,
+                zoomType: 'x',
+                type: 'spline',
+                events: {
+                    load: function () {
+                        var i, series = [];
+                        for (i = 0; i < this.series.length; i += 1) {
+                            series.push(this.series[i]);
+                        }
+                        for (i = 0; i < series.length; i += 1) {
+                            loadcallback(series[i]);
+                        }
+                    }
+                }
+            },
+            title: {text: ''},
+            xAxis: {
+                type: 'datetime',
+                labels: {
+                    overflow: 'justify',
+                    format: '{value:%Y/%m/%d %H:%M:%S}',
+                    align: 'right',
+                    rotation: -30
+                }
+            },
+            yAxis: {title: {text: titletext}},
+            legend: {enabled: true},
+            plotOptions: {
+                spline: {marker: {enabled: true}}
+            },
+            tooltip: {
+                headerFormat: '<b>{series.name}</b><br>',
+                pointFormat: '{point.x:%e. %b}: {point.y:.2f} m'
             },
             series: initcallback()
         });

@@ -1018,6 +1018,18 @@ mvisControllers.controller('experimentTstatController', ['$scope', '$state', 'mv
                 $state.go('error', {error: error});
             });
     }
+    function rttLoadData(nodeid, ifaceid, timestamp, mintimestamp, resolution, series) {
+        console.log("rttLoadData series", nodeid, ifaceid);
+
+        mvisService.getTstatRtt(nodeid, ifaceid, timestamp, mintimestamp, resolution)
+            .success(function (data) {
+                console.log("TSTAT-Rtt: ", data);
+                series.setData(data, true, true);
+            })
+            .error(function (error) {
+                $state.go('error', {error: error});
+            });
+    }
     function getThroughput(nodeiface, timestamp, mintimestamp, resolution) {
         console.log("getThroughput nodeiface", nodeiface, ", timestamp", timestamp, ", mintimestamp", mintimestamp, ", resolution", resolution);
         throughputchart = mvisService.create3DColumnChart('throughput-chart', 'Throughput', function () {
@@ -1036,6 +1048,24 @@ mvisControllers.controller('experimentTstatController', ['$scope', '$state', 'mv
             throughputLoadData(nodeIDs[0], nodeIDs[1], timestamp, mintimestamp, resolution, series);
         });
     }
+    function getRtt(nodeiface, timestamp, mintimestamp, resolution) {
+        console.log("getRtt nodeiface", nodeiface, ", timestamp", timestamp, ", mintimestamp", mintimestamp, ", resolution", resolution);
+        throughputchart = mvisService.createSplineChart('rtt-chart', 'RTT', function () {
+            var i, ret = [];
+            angular.forEach(nodeiface, function (nif) {
+                if (nif !== "") {
+                    ret.push({
+                        name: nif,
+                        data: []
+                    });
+                }
+            });
+            return ret;
+        }, function (series) {
+            var nodeIDs = series.name.replace(" - ", "-").split("-");
+            rttLoadData(nodeIDs[0], nodeIDs[1], timestamp, mintimestamp, resolution, series);
+        });
+    }
 
     $scope.submit = function () {
         try {
@@ -1049,6 +1079,7 @@ mvisControllers.controller('experimentTstatController', ['$scope', '$state', 'mv
 
             console.log("SelNodes", selnodes);
             getThroughput(selnodes, date_time, min_timestamp, mvisQueryService.resolution);
+            getRtt(selnodes, date_time, min_timestamp, mvisQueryService.resolution);
 
         } catch (err) {
             alert("Invalid filters!\n" + err.message);
