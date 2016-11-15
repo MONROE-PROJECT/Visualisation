@@ -1004,7 +1004,7 @@ mvisControllers.controller('experimentBasicController', ['$scope', '$state', 'mv
 mvisControllers.controller('experimentTstatController', ['$scope', '$state', 'mvisService', 'mvisQueryService', function ($scope, $state, mvisService, mvisQueryService) {
     console.log("experimentTstatController");
 
-    var throughputchart, rttchart, retransmissionchart, threewaychart;
+    var throughputchart, rttchart, retransmissionchart, threewaychart, timetolivechart;
 
     function throughputLoadData(nodeid, ifaceid, timestamp, mintimestamp, resolution, series) {
         console.log("throughputLoadData series", nodeid, ifaceid);
@@ -1048,6 +1048,18 @@ mvisControllers.controller('experimentTstatController', ['$scope', '$state', 'mv
         mvisService.getTstatThreewayhandshaketime(nodeid, ifaceid, timestamp, mintimestamp, resolution)
             .success(function (data) {
                 console.log("TSTAT-Threewayhandshaketime: ", data);
+                series.setData(data, true, true);
+            })
+            .error(function (error) {
+                $state.go('error', {error: error});
+            });
+    }
+    function timetoliveLoadData(nodeid, ifaceid, timestamp, mintimestamp, resolution, series) {
+        console.log("timetoliveLoadData series", nodeid, ifaceid);
+
+        mvisService.getTstatTimeToLive(nodeid, ifaceid, timestamp, mintimestamp, resolution)
+            .success(function (data) {
+                console.log("TSTAT-Timetolive: ", data);
                 series.setData(data, true, true);
             })
             .error(function (error) {
@@ -1126,6 +1138,24 @@ mvisControllers.controller('experimentTstatController', ['$scope', '$state', 'mv
             threewayhandshaketimeLoadData(nodeIDs[0], nodeIDs[1], timestamp, mintimestamp, resolution, series);
         });
     }
+    function getTimeToLive(nodeiface, timestamp, mintimestamp, resolution) {
+        console.log("getTimeToLive nodeiface", nodeiface, ", timestamp", timestamp, ", mintimestamp", mintimestamp, ", resolution", resolution);
+        timetolivechart = mvisService.createScatteredChart('timetolive-chart', 'TTL', function () {
+            var i, ret = [];
+            angular.forEach(nodeiface, function (nif) {
+                if (nif !== "") {
+                    ret.push({
+                        name: nif,
+                        data: []
+                    });
+                }
+            });
+            return ret;
+        }, function (series) {
+            var nodeIDs = series.name.replace(" - ", "-").split("-");
+            timetoliveLoadData(nodeIDs[0], nodeIDs[1], timestamp, mintimestamp, resolution, series);
+        });
+    }
 
     $scope.submit = function () {
         try {
@@ -1142,6 +1172,7 @@ mvisControllers.controller('experimentTstatController', ['$scope', '$state', 'mv
             getRtt(selnodes, date_time, min_timestamp, mvisQueryService.resolution);
             getRetransmission(selnodes, date_time, min_timestamp, mvisQueryService.resolution);
             getThreeWayHandshakeTime(selnodes, date_time, min_timestamp, mvisQueryService.resolution);
+            getTimeToLive(selnodes, date_time, min_timestamp, mvisQueryService.resolution);
 
         } catch (err) {
             alert("Invalid filters!\n" + err.message);
