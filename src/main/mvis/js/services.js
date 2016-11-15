@@ -151,6 +151,10 @@ mvisServices.service('mvisService', ['$http', function ($http) {
         return $http.get('/tstatretransmission/' + nodeid + '/' + ifaceid + '/' + timestamp + "/" + mintimestamp + "/" + resolution);
     };
 
+    this.getTstatThreewayhandshaketime = function (nodeid, ifaceid, timestamp, mintimestamp, resolution) {
+        return $http.get('/tstatthreewayhandshaketime/' + nodeid + '/' + ifaceid + '/' + timestamp + "/" + mintimestamp + "/" + resolution);
+    };
+
     this.getCPU = function (nodeid, timestamp, mintimestamp, resolution) {
         return $http.get('/cpu/' + nodeid + '/' + timestamp + "/" + mintimestamp + "/" + resolution);
     };
@@ -771,6 +775,55 @@ mvisServices.service('mvisService', ['$http', function ($http) {
             },
             plotOptions: {
                 column: {pointPadding: 0.2, borderWidth: 0}
+            },
+            series: initcallback()
+        });
+    };
+
+    this.createBasicAreaChart = function (chart, titletext, initcallback, loadcallback) {
+        return new Highcharts.Chart({
+            chart: {
+                renderTo: chart,
+                zoomType: 'x',
+                type: 'area',
+                events: {
+                    load: function () {
+                        var i, series = [];
+                        for (i = 0; i < this.series.length; i += 1) {
+                            series.push(this.series[i]);
+                        }
+                        for (i = 0; i < series.length; i += 1) {
+                            loadcallback(series[i]);
+                        }
+                    }
+                }
+            },
+            title: {text: ''},
+            xAxis: {
+                type: 'datetime',
+                labels: {
+                    overflow: 'justify',
+                    format: '{value:%Y/%m/%d %H:%M:%S}',
+                    align: 'right',
+                    rotation: -30
+                }
+            },
+            yAxis: {title: {text: titletext}},
+            legend: {enabled: true},
+            tooltip: {
+                pointFormat: '{series.name} produced <b>{point.y:,.0f}</b><br/>warheads in {point.x}'
+            },
+            plotOptions: {
+                area: {
+                    marker: {
+                        enabled: false,
+                        symbol: 'circle',
+                        radius: 2,
+                        states: {
+                            hover: {enabled: true}
+                        }
+                    }
+                }
             },
             series: initcallback()
         });

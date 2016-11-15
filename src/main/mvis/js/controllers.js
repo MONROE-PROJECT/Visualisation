@@ -1004,7 +1004,7 @@ mvisControllers.controller('experimentBasicController', ['$scope', '$state', 'mv
 mvisControllers.controller('experimentTstatController', ['$scope', '$state', 'mvisService', 'mvisQueryService', function ($scope, $state, mvisService, mvisQueryService) {
     console.log("experimentTstatController");
 
-    var throughputchart, rttchart, retransmissionchart;
+    var throughputchart, rttchart, retransmissionchart, threewaychart;
 
     function throughputLoadData(nodeid, ifaceid, timestamp, mintimestamp, resolution, series) {
         console.log("throughputLoadData series", nodeid, ifaceid);
@@ -1036,6 +1036,18 @@ mvisControllers.controller('experimentTstatController', ['$scope', '$state', 'mv
         mvisService.getTstatRetransmission(nodeid, ifaceid, timestamp, mintimestamp, resolution)
             .success(function (data) {
                 console.log("TSTAT-Retransmission: ", data);
+                series.setData(data, true, true);
+            })
+            .error(function (error) {
+                $state.go('error', {error: error});
+            });
+    }
+    function threewayhandshaketimeLoadData(nodeid, ifaceid, timestamp, mintimestamp, resolution, series) {
+        console.log("threewayhandshaketimeLoadData series", nodeid, ifaceid);
+
+        mvisService.getTstatThreewayhandshaketime(nodeid, ifaceid, timestamp, mintimestamp, resolution)
+            .success(function (data) {
+                console.log("TSTAT-Threewayhandshaketime: ", data);
                 series.setData(data, true, true);
             })
             .error(function (error) {
@@ -1096,6 +1108,24 @@ mvisControllers.controller('experimentTstatController', ['$scope', '$state', 'mv
             retransmissionLoadData(nodeIDs[0], nodeIDs[1], timestamp, mintimestamp, resolution, series);
         });
     }
+    function getThreeWayHandshakeTime(nodeiface, timestamp, mintimestamp, resolution) {
+        console.log("getThreeWayHandshakeTime nodeiface", nodeiface, ", timestamp", timestamp, ", mintimestamp", mintimestamp, ", resolution", resolution);
+        threewaychart = mvisService.createBasicAreaChart('twht-chart', 'TWHT', function () {
+            var i, ret = [];
+            angular.forEach(nodeiface, function (nif) {
+                if (nif !== "") {
+                    ret.push({
+                        name: nif,
+                        data: []
+                    });
+                }
+            });
+            return ret;
+        }, function (series) {
+            var nodeIDs = series.name.replace(" - ", "-").split("-");
+            threewayhandshaketimeLoadData(nodeIDs[0], nodeIDs[1], timestamp, mintimestamp, resolution, series);
+        });
+    }
 
     $scope.submit = function () {
         try {
@@ -1111,6 +1141,7 @@ mvisControllers.controller('experimentTstatController', ['$scope', '$state', 'mv
             getThroughput(selnodes, date_time, min_timestamp, mvisQueryService.resolution);
             getRtt(selnodes, date_time, min_timestamp, mvisQueryService.resolution);
             getRetransmission(selnodes, date_time, min_timestamp, mvisQueryService.resolution);
+            getThreeWayHandshakeTime(selnodes, date_time, min_timestamp, mvisQueryService.resolution);
 
         } catch (err) {
             alert("Invalid filters!\n" + err.message);
