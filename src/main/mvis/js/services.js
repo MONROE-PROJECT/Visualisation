@@ -139,6 +139,10 @@ mvisServices.service('mvisService', ['$http', function ($http) {
         return $http.get('/httpspeed/' + nodeid + '/' + ifaceid + '/' + timestamp + "/" + mintimestamp + "/" + resolution);
     };
 
+    this.getTstatThroughput = function (nodeid, ifaceid, timestamp, mintimestamp, resolution) {
+        return $http.get('/tstatthroughput/' + nodeid + '/' + ifaceid + '/' + timestamp + "/" + mintimestamp + "/" + resolution);
+    };
+
     this.getCPU = function (nodeid, timestamp, mintimestamp, resolution) {
         return $http.get('/cpu/' + nodeid + '/' + timestamp + "/" + mintimestamp + "/" + resolution);
     };
@@ -636,6 +640,44 @@ mvisServices.service('mvisService', ['$http', function ($http) {
                 }
             },
             title: {text: ''},
+            series: initcallback()
+        });
+    };
+
+    this.create3DColumnChart = function (chart, titletext, initcallback, loadcallback) {
+        return new Highcharts.Chart({
+            chart: {
+                renderTo: chart,
+                zoomType: 'x',
+                type: 'column',
+                options3d: {enabled: true, alpha: 10, beta: 25, depth: 70},
+                events: {
+                    load: function () {
+                        var i, series = [];
+                        for (i = 0; i < this.series.length; i += 1) {
+                            series.push(this.series[i]);
+                        }
+                        for (i = 0; i < series.length; i += 1) {
+                            loadcallback(series[i]);
+                        }
+                    }
+                }
+            },
+            title: {text: ''},
+            xAxis: {
+                type: 'datetime',
+                labels: {
+                    overflow: 'justify',
+                    format: '{value:%Y/%m/%d %H:%M:%S}',
+                    align: 'right',
+                    rotation: -30
+                }
+            },
+            yAxis: {title: {text: titletext}},
+            legend: {enabled: true},
+            plotOptions: {
+                column: {depth: 25}
+            },
             series: initcallback()
         });
     };

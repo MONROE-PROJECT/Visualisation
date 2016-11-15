@@ -127,6 +127,19 @@ mvisApp.config(function ($stateProvider, $urlRouterProvider) {
                 }
             }
         })
+        .state('experiment.tstat', {
+            url: '/tstat',
+            views: {
+                'info': {
+                    templateUrl: 'template/experiment/info.html',
+                    controller: 'experimentInfoController'
+                },
+                'charts': {
+                    templateUrl: 'template/experiment/tstatCharts.html',
+                    controller: 'experimentTstatController'
+                }
+            }
+        })
         .state('scheduler', {
             url: '/scheduler',
             abstract: true,

@@ -638,6 +638,33 @@ app.get('/httpspeed/:nodeid/:ifaceid/:timestamp/:mintimestamp/:resolution', func
         });
 });
 
+app.get('/tstatthroughput/:nodeid/:ifaceid/:timestamp/:mintimestamp/:resolution', function (req, res) {
+    console.log("TSTAT-THROUGHPUT:", req.params.nodeid, req.params.ifaceid, req.params.timestamp, "[", new Date(parseInt(req.params.timestamp, 10)), "]",
+                req.params.mintimestamp, "[", new Date(parseInt(req.params.mintimestamp, 10)), "]", req.params.resolution);
+    // prepared query to the CASSANDRA-DB (the timestamps are stored in milli-secs, no need to convert!)
+    var table = 'monroe_exp_tstat_tcp_complete',
+        query = 'SELECT first, s_bytes_uniq, s_last, s_first FROM ' + table + ' WHERE nodeid = ? AND iccid = ? AND s_ip = ? AND first <= ? AND first >= ? AND s_last > 0 AND s_first > 0 AND s_bytes_uniq > 0 ORDER BY first DESC LIMIT ? ALLOW FILTERING',
+        sip = '193.10.227.25';
+
+    cassclient.execute(query, [req.params.nodeid, req.params.ifaceid, sip, req.params.timestamp, req.params.mintimestamp, req.params.resolution],
+                       {prepare: true}, function (err, data) {
+            if (err) {
+                console.log("Error:", err.message);
+                res.status(500).send(err.message);
+            } else {
+                console.log("TSTAT-THROUGHPUT(", req.params.nodeid, ":", req.params.ifaceid, ") data", JSON.stringify(data));
+                var i, len, info = [], value;
+                for (i = 0, len = data.rows.length; i < len; i += 1) {
+                    value = data.rows[i].s_bytes_uniq / (data.rows[i].s_last - data.rows[i].s_first);
+                    if (value > 0) {
+                        info.unshift([data.rows[i].first, value]);
+                    }
+                }
+                res.json(info);
+            }
+        });
+});
+
 app.get('/cpu/:nodeid/:timestamp/:mintimestamp/:resolution', function (req, res) {
     console.log("CPU:", req.params.nodeid, req.params.timestamp, "[", new Date(parseInt(req.params.timestamp, 10)), "]",
                 req.params.mintimestamp, "[", new Date(parseInt(req.params.mintimestamp, 10)), "]", req.params.resolution);

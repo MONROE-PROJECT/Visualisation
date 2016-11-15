@@ -1000,3 +1000,58 @@ mvisControllers.controller('experimentBasicController', ['$scope', '$state', 'mv
         }
     };
 }]);
+
+mvisControllers.controller('experimentTstatController', ['$scope', '$state', 'mvisService', 'mvisQueryService', function ($scope, $state, mvisService, mvisQueryService) {
+    console.log("experimentTstatController");
+
+    var throughputchart;
+
+    function throughputLoadData(nodeid, ifaceid, timestamp, mintimestamp, resolution, series) {
+        console.log("throughputLoadData series", nodeid, ifaceid);
+
+        mvisService.getTstatThroughput(nodeid, ifaceid, timestamp, mintimestamp, resolution)
+            .success(function (data) {
+                console.log("TSTAT-Throughput: ", data);
+                series.setData(data, true, true);
+            })
+            .error(function (error) {
+                $state.go('error', {error: error});
+            });
+    }
+    function getThroughput(nodeiface, timestamp, mintimestamp, resolution) {
+        console.log("getThroughput nodeiface", nodeiface, ", timestamp", timestamp, ", mintimestamp", mintimestamp, ", resolution", resolution);
+        throughputchart = mvisService.create3DColumnChart('throughput-chart', 'Throughput', function () {
+            var i, ret = [];
+            angular.forEach(nodeiface, function (nif) {
+                if (nif !== "") {
+                    ret.push({
+                        name: nif,
+                        data: []
+                    });
+                }
+            });
+            return ret;
+        }, function (series) {
+            var nodeIDs = series.name.replace(" - ", "-").split("-");
+            throughputLoadData(nodeIDs[0], nodeIDs[1], timestamp, mintimestamp, resolution, series);
+        });
+    }
+
+    $scope.submit = function () {
+        try {
+            console.info("QueryInfo", mvisQueryService);
+
+            var date_time = mvisQueryService.getUTCtime(mvisQueryService.date, mvisQueryService.time),
+                min_timestamp = mvisService.getMinTimestamp(date_time, mvisQueryService.timeslot),
+                selnodes = mvisQueryService.node.split("(").join("").split(")");
+            console.log("date-time", date_time, ", UTC time", new Date(date_time).toUTCString(),
+                        ", min-timestamp", min_timestamp, ", UTC min time", new Date(min_timestamp).toUTCString());
+
+            console.log("SelNodes", selnodes);
+            getThroughput(selnodes, date_time, min_timestamp, mvisQueryService.resolution);
+
+        } catch (err) {
+            alert("Invalid filters!\n" + err.message);
+        }
+    };
+}]);
