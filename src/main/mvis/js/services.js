@@ -147,6 +147,10 @@ mvisServices.service('mvisService', ['$http', function ($http) {
         return $http.get('/tstatrtt/' + nodeid + '/' + ifaceid + '/' + timestamp + "/" + mintimestamp + "/" + resolution);
     };
 
+    this.getTstatRetransmission = function (nodeid, ifaceid, timestamp, mintimestamp, resolution) {
+        return $http.get('/tstatretransmission/' + nodeid + '/' + ifaceid + '/' + timestamp + "/" + mintimestamp + "/" + resolution);
+    };
+
     this.getCPU = function (nodeid, timestamp, mintimestamp, resolution) {
         return $http.get('/cpu/' + nodeid + '/' + timestamp + "/" + mintimestamp + "/" + resolution);
     };
@@ -722,6 +726,51 @@ mvisServices.service('mvisService', ['$http', function ($http) {
             tooltip: {
                 headerFormat: '<b>{series.name}</b><br>',
                 pointFormat: '{point.x:%e. %b}: {point.y:.2f} m'
+            },
+            series: initcallback()
+        });
+    };
+
+    this.createBasicColumnChart = function (chart, titletext, initcallback, loadcallback) {
+        return new Highcharts.Chart({
+            chart: {
+                renderTo: chart,
+                zoomType: 'x',
+                type: 'column',
+                events: {
+                    load: function () {
+                        var i, series = [];
+                        for (i = 0; i < this.series.length; i += 1) {
+                            series.push(this.series[i]);
+                        }
+                        for (i = 0; i < series.length; i += 1) {
+                            loadcallback(series[i]);
+                        }
+                    }
+                }
+            },
+            title: {text: ''},
+            xAxis: {
+                type: 'datetime',
+                labels: {
+                    overflow: 'justify',
+                    format: '{value:%Y/%m/%d %H:%M:%S}',
+                    align: 'right',
+                    rotation: -30
+                }
+            },
+            yAxis: {title: {text: titletext}},
+            legend: {enabled: true},
+            tooltip: {
+                headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                    '<td style="padding:0"><b>{point.y:.1f} mm</b></td></tr>',
+                footerFormat: '</table>',
+                shared: true,
+                useHTML: true
+            },
+            plotOptions: {
+                column: {pointPadding: 0.2, borderWidth: 0}
             },
             series: initcallback()
         });
