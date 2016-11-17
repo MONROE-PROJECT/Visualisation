@@ -265,9 +265,10 @@ app.get('/nodes', function (req, res) {
 
 app.get('/nodelastactivityrtt/:nodeid/:interfaces', function (req, res) {
     var interfaces = req.params.interfaces.split(','),
-        query = 'SELECT timestamp, iccid FROM monroe_exp_ping WHERE nodeid = ? AND iccid IN ? ORDER BY timestamp DESC LIMIT 1';
+        i = interfaces[Math.floor(Math.random() * interfaces.length)],
+        query = 'SELECT timestamp, iccid FROM monroe_exp_ping WHERE nodeid = ? AND iccid = ? ORDER BY timestamp DESC LIMIT 1';
 
-    cassclient.execute(query, [req.params.nodeid, interfaces], {fetchSize: 0}, function (err, data) {
+    cassclient.execute(query, [req.params.nodeid, i], {prepare: true}, function (err, data) {
         if (err) {
             console.log("Error:", err.message);
             res.status(500).send(err.message);
@@ -285,9 +286,10 @@ app.get('/nodelastactivityrtt/:nodeid/:interfaces', function (req, res) {
 
 app.get('/nodelastactivitymodem/:nodeid/:interfaces', function (req, res) {
     var interfaces = req.params.interfaces.split(','),
-        query = 'SELECT timestamp, iccid FROM monroe_meta_device_modem WHERE nodeid = ? AND iccid IN ? ORDER BY timestamp DESC LIMIT 1';
+        i = interfaces[Math.floor(Math.random() * interfaces.length)],
+        query = 'SELECT timestamp, iccid FROM monroe_meta_device_modem WHERE nodeid = ? AND iccid = ? ORDER BY timestamp DESC LIMIT 1';
 
-    cassclient.execute(query, [req.params.nodeid, interfaces], {fetchSize: 0}, function (err, data) {
+    cassclient.execute(query, [req.params.nodeid, i], {prepare: true}, function (err, data) {
         if (err) {
             console.log("Error:", err.message);
             res.status(500).send(err.message);
@@ -316,6 +318,28 @@ app.get('/nodelastactivitygps/:nodeid', function (req, res) {
             var info = {timestamp: null};
             if (data.rows.length > 0) {
                 info.timestamp = data.rows[0].timestamp;
+            }
+            res.json(info);
+        }
+    });
+});
+
+app.get('/nodelastactivitytstat/:nodeid/:interfaces', function (req, res) {
+    var interfaces = req.params.interfaces.split(','),
+        i = interfaces[Math.floor(Math.random() * interfaces.length)],
+        query = 'SELECT first, iccid FROM monroe_exp_tstat_tcp_complete WHERE nodeid = ? AND iccid = ? AND s_ip = ? ORDER BY first DESC LIMIT 1',
+        sip = '193.10.227.25';
+
+    cassclient.execute(query, [req.params.nodeid, i, sip], {prepare: true}, function (err, data) {
+        if (err) {
+            console.log("Error:", err.message);
+            res.status(500).send(err.message);
+        } else {
+            console.log("data", JSON.stringify(data));
+            var info = {timestamp: null, iccid: null};
+            if (data.rows.length > 0) {
+                info.timestamp = (data.rows[0].first / 1000);
+                info.iccid = data.rows[0].iccid;
             }
             res.json(info);
         }

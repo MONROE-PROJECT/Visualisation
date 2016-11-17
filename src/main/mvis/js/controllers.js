@@ -106,7 +106,7 @@ mvisControllers.controller('mainMgmtController', ['$scope', '$state', '$filter',
         }
         console.log("NodeId", nodeid, "Interfaces", interfaces);
         if (interfaces) {
-            tmpret = {id: nodeid, ping: null, modem: null, gps: null};
+            tmpret = {id: nodeid, ping: null, modem: null, gps: null, tstat: null};
 
             mvisService.getNodeLastActivityRTT(nodeid, interfaces)
                 .success(function (data) {
@@ -114,7 +114,7 @@ mvisControllers.controller('mainMgmtController', ['$scope', '$state', '$filter',
                     tmpret.ping = (data.timestamp) ? new Date(parseInt(data.timestamp, 10) * 1000).toUTCString() : "0";
                     tmpret.ping += " (" + data.iccid + ")";
 
-                    if (tmpret.modem && tmpret.gps) {
+                    if (tmpret.modem && tmpret.gps && tmpret.tstat) {
                         $scope.details.push(tmpret);
                         $scope.nodeActivity.total($scope.details.length);
                         $scope.nodeActivity.reload();
@@ -130,7 +130,7 @@ mvisControllers.controller('mainMgmtController', ['$scope', '$state', '$filter',
                     tmpret.modem = (data.timestamp) ? new Date(parseInt(data.timestamp, 10) * 1000).toUTCString() : "0";
                     tmpret.modem += " (" + data.iccid + ")";
 
-                    if (tmpret.ping && tmpret.gps) {
+                    if (tmpret.ping && tmpret.gps && tmpret.tstat) {
                         $scope.details.push(tmpret);
                         $scope.nodeActivity.total($scope.details.length);
                         $scope.nodeActivity.reload();
@@ -145,7 +145,23 @@ mvisControllers.controller('mainMgmtController', ['$scope', '$state', '$filter',
                     console.log("LastActivityGPS", data);
                     tmpret.gps = (data.timestamp) ? new Date(parseInt(data.timestamp, 10) * 1000).toUTCString() : "0";
 
-                    if (tmpret.ping && tmpret.modem) {
+                    if (tmpret.ping && tmpret.modem && tmpret.tstat) {
+                        $scope.details.push(tmpret);
+                        $scope.nodeActivity.total($scope.details.length);
+                        $scope.nodeActivity.reload();
+                    }
+                })
+                .error(function (error) {
+                    $state.go('error', {error: error});
+                });
+
+            mvisService.getNodeLastActivityTSTAT(nodeid, interfaces)
+                .success(function (data) {
+                    console.log("LastActivityTSTAT", data);
+                    tmpret.tstat = (data.timestamp) ? new Date(parseInt(data.timestamp, 10) * 1000).toUTCString() : "0";
+                    tmpret.tstat += " (" + data.iccid + ")";
+
+                    if (tmpret.ping && tmpret.modem && tmpret.gps) {
                         $scope.details.push(tmpret);
                         $scope.nodeActivity.total($scope.details.length);
                         $scope.nodeActivity.reload();

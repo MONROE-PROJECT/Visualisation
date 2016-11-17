@@ -99,6 +99,10 @@ mvisServices.service('mvisService', ['$http', function ($http) {
         return $http.get('/nodelastactivitygps/' + nodeid);
     };
 
+    this.getNodeLastActivityTSTAT = function (nodeid, interfaces) {
+        return $http.get('/nodelastactivitytstat/' + nodeid + '/' + interfaces);
+    };
+
     this.registerDevice = function (body) {
         return $http.post('/register_device', body);
     };
