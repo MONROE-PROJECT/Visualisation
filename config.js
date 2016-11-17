@@ -24,9 +24,9 @@ module.exports = function (config) {
 
     config.strip = compress;
     config.minify_js = compress;
-    config.generate_sourcemaps = compress;
     config.uglify = compress;
 
     // Images minification
     config.minify_images = true;
+    config.generate_sourcemaps = false;
 };
