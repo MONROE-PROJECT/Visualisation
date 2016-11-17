@@ -737,7 +737,7 @@ mvisControllers.controller('experimentInfoController', ['$scope', '$state', 'mvi
     $scope.selectedtuple = "";
 
     $scope.timeslot = {};
-    $scope.timeslots = [{id: "1 hour in the past"}, {id: "6 hours in the past"}, {id: "24 hours in the past"}, {id: "48 hours in the past"}];
+    $scope.timeslots = [{id: "1 hour"}, {id: "6 hours"}, {id: "12 hours"}, {id: "1 day"}, {id: "2 days"}, {id: "5 days"}, {id: "10 days"}, {id: "15 days"}, {id: "30 days"}];
 
     $scope.resolution = {};
     $scope.resolutions = [{id: 100}, {id: 500}, {id: 1000}, {id: 2000}, {id: 3000}, {id: 4000}, {id: 5000}];

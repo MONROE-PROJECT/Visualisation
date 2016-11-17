@@ -31,8 +31,8 @@
     <div class="col-xs-4"><timepicker-pop input-time="time" class="input-group" disabled="disabledT" show-meridian='true'></timepicker-pop></div>
 </div>
 <div class="row" style="border:1px; padding:2px;">
-    <div class="col-xs-2"><label for="timeslot">Timeslot:</label></div>
-    <div class="col-xs-10">
+    <div class="col-xs-6">
+        <label for="timeslot">Timeslot (in the past):</label>
         <ui-select ng-model="timeslot.selected" theme="select2" ng-disabled="disabled" style="width: 100%;">
             <ui-select-match placeholder="Limit the data in a specific timeslot...">{{$select.selected.id}}</ui-select-match>
             <ui-select-choices repeat="t in timeslots | filter: {id: $select.search}">
@@ -40,10 +40,8 @@
             </ui-select-choices>
         </ui-select>
     </div>
-</div>
-<div class="row" style="border:1px; padding:2px;">
-    <div class="col-xs-2"><label for="resolution">Resolution (points):</label></div>
-    <div class="col-xs-10">
+    <div class="col-xs-6">
+        <label for="resolution">Resolution (points):</label>
         <ui-select ng-model="resolution.selected" theme="select2" ng-disabled="disabled" style="width: 100%;">
             <ui-select-match placeholder="Select a resolution...">{{$select.selected.id}}</ui-select-match>
             <ui-select-choices repeat="r in resolutions | filter: {id: $select.search}">
