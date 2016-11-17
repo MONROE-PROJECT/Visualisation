@@ -681,7 +681,7 @@ app.get('/tstatthroughput/:nodeid/:ifaceid/:timestamp/:mintimestamp/:resolution'
                 for (i = 0, len = data.rows.length; i < len; i += 1) {
                     value = data.rows[i].s_bytes_uniq / (data.rows[i].s_last - data.rows[i].s_first);
                     if (value > 0) {
-                        info.unshift([data.rows[i].first, value]);
+                        info.unshift([Math.floor(data.rows[i].first), value]);
                     }
                 }
                 res.json(info);
@@ -706,7 +706,7 @@ app.get('/tstatrtt/:nodeid/:ifaceid/:timestamp/:mintimestamp/:resolution', funct
                 console.log("TSTAT-RTT(", req.params.nodeid, ":", req.params.ifaceid, ") data", JSON.stringify(data));
                 var i, len, info = [];
                 for (i = 0, len = data.rows.length; i < len; i += 1) {
-                    info.unshift([data.rows[i].first, data.rows[i].c_rtt_min]);
+                    info.unshift([Math.floor(data.rows[i].first), Math.floor(data.rows[i].c_rtt_min)]);
                 }
                 res.json(info);
             }
@@ -730,7 +730,7 @@ app.get('/tstatretransmission/:nodeid/:ifaceid/:timestamp/:mintimestamp/:resolut
                 console.log("TSTAT-RETRANSMISSION(", req.params.nodeid, ":", req.params.ifaceid, ") data", JSON.stringify(data));
                 var i, len, info = [];
                 for (i = 0, len = data.rows.length; i < len; i += 1) {
-                    info.unshift([data.rows[i].first, data.rows[i].s_pkts_retx]);
+                    info.unshift([Math.floor(data.rows[i].first), data.rows[i].s_pkts_retx]);
                 }
                 res.json(info);
             }
@@ -756,7 +756,7 @@ app.get('/tstatthreewayhandshaketime/:nodeid/:ifaceid/:timestamp/:mintimestamp/:
                 for (i = 0, len = data.rows.length; i < len; i += 1) {
                     value = data.rows[i].s_first_ack - data.rows[i].c_first;
                     if (value > 0) {
-                        info.unshift([data.rows[i].first, value]);
+                        info.unshift([Math.floor(data.rows[i].first), value]);
                     }
                 }
                 res.json(info);
@@ -781,7 +781,7 @@ app.get('/tstattimetolive/:nodeid/:ifaceid/:timestamp/:mintimestamp/:resolution'
                 console.log("TSTAT-TIMETOLIVE(", req.params.nodeid, ":", req.params.ifaceid, ") data", JSON.stringify(data));
                 var i, len, info = [];
                 for (i = 0, len = data.rows.length; i < len; i += 1) {
-                    info.unshift([data.rows[i].first, data.rows[i].s_ttl_min]);
+                    info.unshift([Math.floor(data.rows[i].first), Math.floor(data.rows[i].s_ttl_min)]);
                 }
                 res.json(info);
             }

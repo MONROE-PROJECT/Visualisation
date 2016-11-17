@@ -668,7 +668,7 @@ mvisServices.service('mvisService', ['$http', function ($http) {
         return new Highcharts.Chart({
             chart: {
                 renderTo: chart,
-                zoomType: 'x',
+                zoomType: 'xy',
                 type: 'column',
                 options3d: {enabled: true, alpha: 10, beta: 25, depth: 70},
                 events: {
@@ -706,7 +706,7 @@ mvisServices.service('mvisService', ['$http', function ($http) {
         return new Highcharts.Chart({
             chart: {
                 renderTo: chart,
-                zoomType: 'x',
+                zoomType: 'xy',
                 type: 'spline',
                 events: {
                     load: function () {
@@ -736,8 +736,8 @@ mvisServices.service('mvisService', ['$http', function ($http) {
                 spline: {marker: {enabled: true}}
             },
             tooltip: {
-                headerFormat: '<b>{series.name}</b><br>',
-                pointFormat: '{point.x:%e. %b}: {point.y:.2f} m'
+                headerFormat: '{point.key}<br>',
+                pointFormat: '{series.name}: <b>{point.y:.2f}</b>'
             },
             series: initcallback()
         });
@@ -747,7 +747,7 @@ mvisServices.service('mvisService', ['$http', function ($http) {
         return new Highcharts.Chart({
             chart: {
                 renderTo: chart,
-                zoomType: 'x',
+                zoomType: 'xy',
                 type: 'column',
                 events: {
                     load: function () {
@@ -774,10 +774,8 @@ mvisServices.service('mvisService', ['$http', function ($http) {
             yAxis: {title: {text: titletext}},
             legend: {enabled: true},
             tooltip: {
-                headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
-                pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
-                    '<td style="padding:0"><b>{point.y:.1f} mm</b></td></tr>',
-                footerFormat: '</table>',
+                headerFormat: '<span style="font-size:10px">{point.key}</span><br>',
+                pointFormat: '{series.name}: <b>{point.y:,.0f}</b>',
                 shared: true,
                 useHTML: true
             },
@@ -792,7 +790,7 @@ mvisServices.service('mvisService', ['$http', function ($http) {
         return new Highcharts.Chart({
             chart: {
                 renderTo: chart,
-                zoomType: 'x',
+                zoomType: 'xy',
                 type: 'area',
                 events: {
                     load: function () {
@@ -819,7 +817,7 @@ mvisServices.service('mvisService', ['$http', function ($http) {
             yAxis: {title: {text: titletext}},
             legend: {enabled: true},
             tooltip: {
-                pointFormat: '{series.name} produced <b>{point.y:,.0f}</b><br/>warheads in {point.x}'
+                pointFormat: '{series.name}: <b>{point.y:,.0f}</b>'
             },
             plotOptions: {
                 area: {
@@ -881,8 +879,8 @@ mvisServices.service('mvisService', ['$http', function ($http) {
                         }
                     },
                     tooltip: {
-                        headerFormat: '<b>{series.name}</b><br>',
-                        pointFormat: '{point.x}, {point.y}'
+                        headerFormat: '{point.key}<br>',
+                        pointFormat: '{series.name}: <b>{point.y}</b>'
                     }
                 }
             },
