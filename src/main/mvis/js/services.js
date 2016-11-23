@@ -711,7 +711,7 @@ mvisServices.service('mvisService', ['$http', function ($http) {
                     rotation: -30
                 }
             },
-            yAxis: {title: {text: titletext}},
+            yAxis: {title: {text: titletext + ' (KByte/sec)'}},
             legend: {enabled: true},
             plotOptions: {
                 column: {depth: 25}
@@ -748,7 +748,7 @@ mvisServices.service('mvisService', ['$http', function ($http) {
                     rotation: -30
                 }
             },
-            yAxis: {title: {text: titletext}},
+            yAxis: {title: {text: titletext + ' (msec)'}},
             legend: {enabled: true},
             plotOptions: {
                 spline: {marker: {enabled: true}}
@@ -789,7 +789,7 @@ mvisServices.service('mvisService', ['$http', function ($http) {
                     rotation: -30
                 }
             },
-            yAxis: {title: {text: titletext}},
+            yAxis: {title: {text: titletext + ' (num. of packets)'}},
             legend: {enabled: true},
             tooltip: {
                 headerFormat: '<span style="font-size:10px">{point.key}</span><br>',
@@ -832,7 +832,7 @@ mvisServices.service('mvisService', ['$http', function ($http) {
                     rotation: -30
                 }
             },
-            yAxis: {title: {text: titletext}},
+            yAxis: {title: {text: titletext + ' (msec)'}},
             legend: {enabled: true},
             tooltip: {
                 pointFormat: '{series.name}: <b>{point.y:,.0f}</b>'
@@ -881,7 +881,7 @@ mvisServices.service('mvisService', ['$http', function ($http) {
                     rotation: -30
                 }
             },
-            yAxis: {title: {text: titletext}},
+            yAxis: {title: {text: titletext + ' (sec)'}},
             legend: {enabled: true},
             plotOptions: {
                 scatter: {
