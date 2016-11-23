@@ -689,12 +689,12 @@ app.get('/tstatthroughput/:nodeid/:ifaceid/:timestamp/:mintimestamp/:resolution'
         });
 });
 
-app.get('/tstatrtt/:nodeid/:ifaceid/:timestamp/:mintimestamp/:resolution', function (req, res) {
-    console.log("TSTAT-RTT:", req.params.nodeid, req.params.ifaceid, req.params.timestamp, "[", new Date(parseInt(req.params.timestamp, 10)), "]",
+app.get('/tstatavgrtt/:nodeid/:ifaceid/:timestamp/:mintimestamp/:resolution', function (req, res) {
+    console.log("TSTAT-AVG-RTT:", req.params.nodeid, req.params.ifaceid, req.params.timestamp, "[", new Date(parseInt(req.params.timestamp, 10)), "]",
                 req.params.mintimestamp, "[", new Date(parseInt(req.params.mintimestamp, 10)), "]", req.params.resolution);
     // prepared query to the CASSANDRA-DB (the timestamps are stored in milli-secs, no need to convert!)
     var table = 'monroe_exp_tstat_tcp_complete',
-        query = 'SELECT first, c_rtt_min FROM ' + table + ' WHERE nodeid = ? AND iccid = ? AND s_ip = ? AND first <= ? AND first >= ? AND c_rtt_min > 0 ORDER BY first DESC LIMIT ? ALLOW FILTERING',
+        query = 'SELECT first, c_rtt_avg FROM ' + table + ' WHERE nodeid = ? AND iccid = ? AND s_ip = ? AND first <= ? AND first >= ? AND c_rtt_min > 0 ORDER BY first DESC LIMIT ? ALLOW FILTERING',
         sip = '193.10.227.25';
 
     cassclient.execute(query, [req.params.nodeid, req.params.ifaceid, sip, req.params.timestamp, req.params.mintimestamp, req.params.resolution],
@@ -703,10 +703,34 @@ app.get('/tstatrtt/:nodeid/:ifaceid/:timestamp/:mintimestamp/:resolution', funct
                 console.log("Error:", err.message);
                 res.status(500).send(err.message);
             } else {
-                console.log("TSTAT-RTT(", req.params.nodeid, ":", req.params.ifaceid, ") data", JSON.stringify(data));
+                console.log("TSTAT-AVG-RTT(", req.params.nodeid, ":", req.params.ifaceid, ") data", JSON.stringify(data));
                 var i, len, info = [];
                 for (i = 0, len = data.rows.length; i < len; i += 1) {
-                    info.unshift([Math.floor(data.rows[i].first), Math.floor(data.rows[i].c_rtt_min)]);
+                    info.unshift([Math.floor(data.rows[i].first), Math.floor(data.rows[i].c_rtt_avg)]);
+                }
+                res.json(info);
+            }
+        });
+});
+
+app.get('/tstatrangertt/:nodeid/:ifaceid/:timestamp/:mintimestamp/:resolution', function (req, res) {
+    console.log("TSTAT-RANGE-RTT:", req.params.nodeid, req.params.ifaceid, req.params.timestamp, "[", new Date(parseInt(req.params.timestamp, 10)), "]",
+                req.params.mintimestamp, "[", new Date(parseInt(req.params.mintimestamp, 10)), "]", req.params.resolution);
+    // prepared query to the CASSANDRA-DB (the timestamps are stored in milli-secs, no need to convert!)
+    var table = 'monroe_exp_tstat_tcp_complete',
+        query = 'SELECT first, c_rtt_min, c_rtt_max FROM ' + table + ' WHERE nodeid = ? AND iccid = ? AND s_ip = ? AND first <= ? AND first >= ? AND c_rtt_min > 0 ORDER BY first DESC LIMIT ? ALLOW FILTERING',
+        sip = '193.10.227.25';
+
+    cassclient.execute(query, [req.params.nodeid, req.params.ifaceid, sip, req.params.timestamp, req.params.mintimestamp, req.params.resolution],
+                       {prepare: true}, function (err, data) {
+            if (err) {
+                console.log("Error:", err.message);
+                res.status(500).send(err.message);
+            } else {
+                console.log("TSTAT-RANGE-RTT(", req.params.nodeid, ":", req.params.ifaceid, ") data", JSON.stringify(data));
+                var i, len, info = [];
+                for (i = 0, len = data.rows.length; i < len; i += 1) {
+                    info.unshift([Math.floor(data.rows[i].first), Math.floor(data.rows[i].c_rtt_min), Math.floor(data.rows[i].c_rtt_max)]);
                 }
                 res.json(info);
             }

@@ -165,8 +165,12 @@ mvisServices.service('mvisService', ['$http', function ($http) {
         return $http.get('/tstatthroughput/' + nodeid + '/' + ifaceid + '/' + timestamp + "/" + mintimestamp + "/" + resolution);
     };
 
-    this.getTstatRtt = function (nodeid, ifaceid, timestamp, mintimestamp, resolution) {
-        return $http.get('/tstatrtt/' + nodeid + '/' + ifaceid + '/' + timestamp + "/" + mintimestamp + "/" + resolution);
+    this.getTstatAvgRtt = function (nodeid, ifaceid, timestamp, mintimestamp, resolution) {
+        return $http.get('/tstatavgrtt/' + nodeid + '/' + ifaceid + '/' + timestamp + "/" + mintimestamp + "/" + resolution);
+    };
+
+    this.getTstatRangeRtt = function (nodeid, ifaceid, timestamp, mintimestamp, resolution) {
+        return $http.get('/tstatrangertt/' + nodeid + '/' + ifaceid + '/' + timestamp + "/" + mintimestamp + "/" + resolution);
     };
 
     this.getTstatRetransmission = function (nodeid, ifaceid, timestamp, mintimestamp, resolution) {
@@ -756,6 +760,43 @@ mvisServices.service('mvisService', ['$http', function ($http) {
             tooltip: {
                 headerFormat: '{point.key}<br>',
                 pointFormat: '{series.name}: <b>{point.y:.2f}</b>'
+            },
+            series: initcallback()
+        });
+    };
+
+    this.createAreaRangeAndLineChart = function (chart, titletext, initcallback, loadcallback) {
+        return new Highcharts.Chart({
+            chart: {
+                renderTo: chart,
+                zoomType: 'xy',
+                events: {
+                    load: function () {
+                        var i, series = [];
+                        for (i = 0; i < this.series.length; i += 1) {
+                            series.push(this.series[i]);
+                        }
+                        for (i = 0; i < series.length; i += 1) {
+                            loadcallback(series[i]);
+                        }
+                    }
+                }
+            },
+            title: {text: ''},
+            xAxis: {
+                type: 'datetime',
+                labels: {
+                    overflow: 'justify',
+                    format: '{value:%Y/%m/%d %H:%M:%S}',
+                    align: 'right',
+                    rotation: -30
+                }
+            },
+            yAxis: {title: {text: titletext + ' (msec)'}},
+            legend: {enabled: true},
+            tooltip: {
+                crosshairs: true,
+                shared: true
             },
             series: initcallback()
         });

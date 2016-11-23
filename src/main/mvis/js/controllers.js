@@ -1034,12 +1034,24 @@ mvisControllers.controller('experimentTstatController', ['$scope', '$state', 'mv
                 $state.go('error', {error: error});
             });
     }
-    function rttLoadData(nodeid, ifaceid, timestamp, mintimestamp, resolution, series) {
-        console.log("rttLoadData series", nodeid, ifaceid);
+    function rttAvgLoadData(nodeid, ifaceid, timestamp, mintimestamp, resolution, series) {
+        console.log("rttAvgLoadData series", nodeid, ifaceid);
 
-        mvisService.getTstatRtt(nodeid, ifaceid, timestamp, mintimestamp, resolution)
+        mvisService.getTstatAvgRtt(nodeid, ifaceid, timestamp, mintimestamp, resolution)
             .success(function (data) {
-                console.log("TSTAT-Rtt: ", data);
+                console.log("TSTAT-Avg-Rtt: ", data);
+                series.setData(data, true, true);
+            })
+            .error(function (error) {
+                $state.go('error', {error: error});
+            });
+    }
+    function rttRangeLoadData(nodeid, ifaceid, timestamp, mintimestamp, resolution, series) {
+        console.log("rttRangeLoadData series", nodeid, ifaceid);
+
+        mvisService.getTstatRangeRtt(nodeid, ifaceid, timestamp, mintimestamp, resolution)
+            .success(function (data) {
+                console.log("TSTAT-Range-Rtt: ", data);
                 series.setData(data, true, true);
             })
             .error(function (error) {
@@ -1102,20 +1114,38 @@ mvisControllers.controller('experimentTstatController', ['$scope', '$state', 'mv
     }
     function getRtt(nodeiface, timestamp, mintimestamp, resolution) {
         console.log("getRtt nodeiface", nodeiface, ", timestamp", timestamp, ", mintimestamp", mintimestamp, ", resolution", resolution);
-        rttchart = mvisService.createSplineChart('rtt-chart', 'RTT', function () {
-            var i, ret = [];
+        var avg = ' avg', range = ' range';
+        rttchart = mvisService.createAreaRangeAndLineChart('rtt-chart', 'RTT', function () {
+            var i = 0, ret = [];
             angular.forEach(nodeiface, function (nif) {
                 if (nif !== "") {
                     ret.push({
-                        name: nif,
-                        data: []
+                        name: nif + avg,
+                        data: [],
+                        zIndex: 1,
+                        marker: {fillColor: 'white', lineWidth: 2, lineColor: Highcharts.getOptions().colors[i]}
                     });
+                    ret.push({
+                        name: nif + range,
+                        data: [],
+                        type: 'arearange',
+                        lineWidth: 0,
+                        linkedTo: ':previous',
+                        color: Highcharts.getOptions().colors[i],
+                        fillOpacity: 0.3,
+                        zIndex: 0
+                    });
+                    i += 1;
                 }
             });
             return ret;
         }, function (series) {
             var nodeIDs = series.name.replace(" - ", "-").split("-");
-            rttLoadData(nodeIDs[0], nodeIDs[1], timestamp, mintimestamp, resolution, series);
+            if (series.name.indexOf(avg) !== -1) {
+                rttAvgLoadData(nodeIDs[0], nodeIDs[1].replace(avg, ''), timestamp, mintimestamp, resolution, series);
+            } else if (series.name.indexOf(range) !== -1) {
+                rttRangeLoadData(nodeIDs[0], nodeIDs[1].replace(range, ''), timestamp, mintimestamp, resolution, series);
+            }
         });
     }
     function getRetransmission(nodeiface, timestamp, mintimestamp, resolution) {
