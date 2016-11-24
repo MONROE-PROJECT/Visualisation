@@ -922,7 +922,7 @@ mvisServices.service('mvisService', ['$http', function ($http) {
                     rotation: -30
                 }
             },
-            yAxis: {title: {text: titletext + ' (sec)'}},
+            yAxis: {title: {text: titletext + ' (64-TTL Max)'}},
             legend: {enabled: true},
             plotOptions: {
                 scatter: {
