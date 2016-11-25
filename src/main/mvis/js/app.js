@@ -34,9 +34,12 @@ mvisApp.config(function ($stateProvider, $urlRouterProvider) {
         .state('start', {
             url: '',
             views: {
-                'main': {
+                'mainWithScheduler': {
                     templateUrl: 'template/start.html',
                     controller: 'StartController'
+                },
+                'main': {
+                    controller: 'StartSimpleController'
                 }
             }
         })

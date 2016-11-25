@@ -39,6 +39,17 @@ mvisControllers.controller('StartController', ['$scope', '$state', 'mvisService'
     console.log("StartController has been loaded correctly.");
 }]);
 
+mvisControllers.controller('StartSimpleController', ['$scope', '$state', 'mvisService', function ($scope, $state, mvisService) {
+    mvisService.ping()
+        .success(function () {
+            $state.go('testbed.map');
+        })
+        .error(function () {
+            $state.go('error', {error: "Unable to contact the server!"});
+        });
+    console.log("StartSimpleController has been loaded correctly.");
+}]);
+
 mvisControllers.controller('mainMgmtController', ['$scope', '$state', '$filter', 'ngTableParams', 'mvisService', function ($scope, $state, $filter, NgTableParams, mvisService) {
     $scope.nodeslength = 0;
 
