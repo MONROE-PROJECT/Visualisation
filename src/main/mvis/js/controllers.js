@@ -736,10 +736,10 @@ mvisControllers.controller('experimentInfoController', ['$scope', '$state', 'mvi
     $scope.iface = {};
     $scope.selectedtuple = "";
 
-    $scope.timeslot = {};
-    $scope.timeslots = [{id: "1 hour"}, {id: "6 hours"}, {id: "12 hours"}, {id: "1 day"}, {id: "2 days"}, {id: "5 days"}, {id: "10 days"}, {id: "15 days"}, {id: "30 days"}];
+    $scope.timeslot = {selected: {id: "6 hours"}};
+    $scope.timeslots = [{id: "6 hours"}, {id: "12 hours"}, {id: "1 day"}, {id: "2 days"}, {id: "5 days"}, {id: "10 days"}, {id: "15 days"}, {id: "30 days"}];
 
-    $scope.resolution = {};
+    $scope.resolution = {selected: {id: 100}};
     $scope.resolutions = [{id: 100}, {id: 500}, {id: 1000}, {id: 2000}, {id: 3000}, {id: 4000}, {id: 5000}];
 
     $scope.testbed = {};
@@ -799,13 +799,9 @@ mvisControllers.controller('experimentInfoController', ['$scope', '$state', 'mvi
     };
 
     $scope.submit = function () {
-        if (!$scope.timeslot.hasOwnProperty('selected')) {
-            alert("Please specify the timeslot!");
+        console.log("timeslot", $scope.timeslot, "resolution", $scope.resolution);
 
-        } else if (!$scope.resolution.hasOwnProperty('selected')) {
-            alert("Please specify the resolution!");
-
-        } else if ($scope.selectedtuple === "") {
+        if ($scope.selectedtuple === "") {
             alert("Please select node and interface!");
 
         } else {
