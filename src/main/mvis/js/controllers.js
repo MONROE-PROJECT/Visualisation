@@ -824,6 +824,11 @@ mvisControllers.controller('experimentInfoController', ['$scope', '$state', 'mvi
     $scope.$on("$destroy", function () {
         mvisQueryService.reset();
     });
+
+    $scope.resetFilters = function () {
+        mvisQueryService.reset();
+        $state.reload();
+    };
 }]);
 
 mvisControllers.controller('experimentBasicController', ['$scope', '$state', 'mvisService', 'mvisQueryService', function ($scope, $state, mvisService, mvisQueryService) {
