@@ -853,7 +853,7 @@ app.get('/gps/:country/:site/:nodeid/:timestamp/:mintimestamp/:resolution', func
         threshold = Math.floor(req.params.timestamp / 1000),
         minthreshold = Math.floor(req.params.mintimestamp / 1000),
         table = 'monroe_meta_device_gps',
-        query = 'SELECT longitude, latitude FROM ' + table + ' WHERE nodeid = ? AND timestamp <= ? AND timestamp >= ? ORDER BY timestamp DESC LIMIT ?';
+        query = 'SELECT longitude, latitude, timestamp FROM ' + table + ' WHERE nodeid = ? AND timestamp <= ? AND timestamp >= ? ORDER BY timestamp DESC LIMIT ?';
 
     cassclient.execute(query, [req.params.nodeid, threshold, minthreshold, req.params.resolution],
                        {prepare: true}, function (err, data) {
@@ -868,6 +868,7 @@ app.get('/gps/:country/:site/:nodeid/:timestamp/:mintimestamp/:resolution', func
                         info.data.unshift({lat: parseFloat(data.rows[i].latitude), lng: parseFloat(data.rows[i].longitude)});
                         info.current.lat = parseFloat(data.rows[i].latitude);
                         info.current.lng = parseFloat(data.rows[i].longitude);
+                        info.current.timestamp = Math.floor(data.rows[i].timestamp * 1000);
                     }
                 }
                 res.json(info);

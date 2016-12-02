@@ -143,6 +143,15 @@ mvisApp.config(function ($stateProvider, $urlRouterProvider) {
                 }
             }
         })
+        .state('experiment.gps', {
+            url: '/gps',
+            views: {
+                'info': {
+                    templateUrl: 'template/experiment/gpsInfo.html',
+                    controller: 'experimentGpsInfoController'
+                }
+            }
+        })
         .state('scheduler', {
             url: '/scheduler',
             abstract: true,

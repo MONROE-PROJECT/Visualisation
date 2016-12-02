@@ -1237,3 +1237,88 @@ mvisControllers.controller('experimentTstatController', ['$scope', '$state', 'mv
         }
     };
 }]);
+
+mvisControllers.controller('experimentGpsInfoController', ['$scope', '$state', 'mvisService', 'mvisQueryService', function ($scope, $state, mvisService, mvisQueryService) {
+    console.log("experimentGpsController");
+    $scope.date = new Date();
+    $scope.time = new Date();
+    $scope.disabledT = false;
+    $scope.format = 'dd-MMMM-yyyy';
+    $scope.node = {};
+
+    $scope.timeslot = {selected: {id: "6 hours"}};
+    $scope.timeslots = [{id: "6 hours"}, {id: "12 hours"}, {id: "1 day"}, {id: "2 days"}, {id: "5 days"}, {id: "10 days"}, {id: "15 days"}, {id: "30 days"}];
+
+    $scope.resolution = {selected: {id: 100}};
+    $scope.resolutions = [{id: 100}, {id: 500}, {id: 1000}, {id: 2000}, {id: 3000}, {id: 4000}, {id: 5000}];
+
+    $scope.testbed = {};
+    $scope.testbeds = [{id: "it - pisa"}, {id: "it - torino"}, {id: "es - spain"}, {id: "no - norway"}, {id: "se - sweden"}];
+
+    $scope.openDate = function ($event) {
+        $event.preventDefault();
+        $event.stopPropagation();
+        $scope.openedD = true;
+    };
+
+    $scope.testbedSelected = function ($model) {
+        console.log("Selected testbed", $model.id);
+        var x = $model.id.replace(" - ", "-").split("-");
+        mvisService.getNodesName(x[0], x[1])
+            .success(function (data) {
+                console.log("Nodes info", data);
+
+                $scope.nodes = [];
+                angular.forEach(data, function (node) {
+                    $scope.nodes.push({
+                        country: x[0],
+                        site: x[1],
+                        id: mvisService.composeNodeName(node.nodeid, node.displayname, node.hostname)
+                    });
+                });
+            })
+            .error(function (error) {
+                $state.go('error', {error: error});
+            });
+    };
+
+    $scope.submit = function () {
+        var date_time = mvisQueryService.getUTCtime($scope.date, $scope.time),
+            min_timestamp = mvisService.getMinTimestamp(date_time, $scope.timeslot.selected.id),
+            country_site = $scope.testbed.selected.id.replace(" - ", "-").split("-"),
+            nId = mvisService.decomposeNodeId($scope.node.selected.id);
+        console.log("date-time", date_time, ", UTC time", new Date(date_time).toUTCString(),
+                    ", min-timestamp", min_timestamp, ", UTC min time", new Date(min_timestamp).toUTCString());
+
+        mvisService.getGps(country_site[0], country_site[1], nId, date_time, min_timestamp, $scope.resolution.selected.id)
+            .success(function (info) {
+                console.log("GPS: ", info);
+
+                var center = (info.current.lat && info.current.lng) ? {lat: info.current.lat, lng: info.current.lng} : {lat: info.centre.lat, lng: info.centre.lng},
+                    gmap = new google.maps.Map(document.getElementById('map'), {
+                        zoom: 10,
+                        center: center
+                    }),
+                    polyline = new google.maps.Polyline({
+                        path: info.data,
+                        geodesic: true,
+                        strokeColor: '#FF0000',
+                        strokeOpacity: 1.0,
+                        strokeWeight: 2
+                    }),
+                    marker = new google.maps.Marker({
+                        position: new google.maps.LatLng(info.current.lat, info.current.lng),
+                        title: "Lat: " + info.current.lat + ", Lng: " + info.current.lng + ", Time: " + new Date(info.current.timestamp).toUTCString(),
+                        map: gmap
+                    });
+                polyline.setMap(gmap);
+            })
+            .error(function (error) {
+                $state.go('error', {error: error});
+            });
+    };
+
+    $scope.resetFilters = function () {
+        $state.reload();
+    };
+}]);
