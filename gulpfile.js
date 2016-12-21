@@ -295,3 +295,7 @@ gulp.task('build', function (done) {
 gulp.task('run', function (done) {
     seq('stop', 'build', 'connect', done);
 });
+
+gulp.task('distclean', function (done) {
+    del(['node_modules', 'bower_components', 'target'], done);
+});
