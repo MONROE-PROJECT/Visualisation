@@ -80,7 +80,6 @@ var config = {
             './bower_components/bootstrap/dist/js/bootstrap.min.js',
             './bower_components/angular-ui-select/dist/select.min.js',
             './bower_components/angular-sanitize/angular-sanitize.min.js',
-            './bower_components/underscore/underscore.min.js',
             './bower_components/highstock/highstock.js',
             './bower_components/highstock/highcharts-more.js',
             './src/main/web_deps/timepickerpop/timepickerpop.js'

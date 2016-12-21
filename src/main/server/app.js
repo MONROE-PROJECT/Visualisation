@@ -24,7 +24,6 @@ var port = 8080,
     address = "0.0.0.0";
 
 var express = require('express'),
-    _ = require('underscore'),
     logger = require('morgan'),
     cookieParser = require('cookie-parser'),
     bodyParser = require('body-parser'),
